@@ -87,7 +87,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         super(name);
         car = new Car();//создание объекта - модели платформы
 
-        this.init();
+        this.init();//создание формы
         form = this;
         setFocusable(true);
         requestFocusInWindow();
