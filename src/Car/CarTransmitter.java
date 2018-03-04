@@ -79,11 +79,7 @@ public class CarTransmitter extends Thread{//класс - передатчик. 
                }
                car.parseStatus(sarr);
                System.out.println(s);
-                if (car.isNavigate()){
 
-                    //car.calcCoordinates(d1,d2);
-                }
-               //System.out.println();
 
 
                 Thread.currentThread().sleep(requestFrequency);

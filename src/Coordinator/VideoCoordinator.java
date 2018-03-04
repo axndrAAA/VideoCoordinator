@@ -1,6 +1,7 @@
 package Coordinator;
 
 import Form.CalibrationWindow;
+import Form.CarDDAppForm;
 import Form.Grid;
 import org.opencv.core.*;
 
@@ -84,14 +85,14 @@ public class VideoCoordinator extends Thread {
         return cameraFeed;
     }
 
-    public VideoCoordinator(int cameraNum, Grid grid)throws AccessException{
+    public VideoCoordinator(int cameraNum)throws AccessException{
         super();
         System.out.println(Core.VERSION);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         this.objectsToTrack = new  ArrayList<ObjOnImage>();
         this.capture = new VideoCapture(cameraNum);
-        this.grid = grid;
+        this.grid = CarDDAppForm.grid;
         if(!this.capture.isOpened()){
             throw new AccessException("Camera did not opened");
         }
@@ -104,8 +105,8 @@ public class VideoCoordinator extends Thread {
         threshShow = new Imshow(thresholdedWIndowName);
     }
 
-    public VideoCoordinator(int camNum, Grid grid,String fileParth)throws AccessException{
-        this(camNum,grid);
+    public VideoCoordinator(int camNum,String fileParth)throws AccessException{
+        this(camNum);
         loadSettingsFromFile(fileParth);
     }
 

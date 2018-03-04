@@ -1,12 +1,11 @@
 package Car;
 
+import Coordinator.ObjOnImage;
+
 /**
  * Created by Александр on 26.10.2016.
  */
 public class Car {//класс-модель платформы
-    static {
-        tr_alt = 20;
-    };
 
     private byte fsb;//1 - back; 2 - stop; 3 - forward
     private byte lfr;//1 - left; 2 - forward; 3 - right
@@ -23,13 +22,12 @@ public class Car {//класс-модель платформы
 
     private String IP;
     private int port;
-
-    public static int tr_alt;
+    ObjOnImage carOnImage;
 
     private int numberInList = 0;
 
     private byte mode;//0 - просто управление, 1 - следование в точку
-    private boolean isNavigate; // работает ли навигация
+
 
     public String getIP() {
         return IP;
@@ -66,20 +64,17 @@ public class Car {//класс-модель платформы
     public void setYdest(int ydest) {this.ydest = ydest;}
 
 
-    public int getAzimut() { return azimut;}
-    public void setAzimut(int az) {this.azimut = az;}
+    public synchronized int getAzimut() { return azimut;}
+    public synchronized void setAzimut(int az) {this.azimut = az;}
 
-    public int getX() { return x;}
-    public int getY() { return y;}
+    public synchronized int getX() { return x;}
+    public synchronized int getY() { return y;}
 
-    public void setX(int x) {this.x = x;}
-    public void setY(int y) {this.y = y;}
+    public synchronized void setX(int x) {this.x = x;}
+    public synchronized void setY(int y) {this.y = y;}
 
     public boolean isArrived() {return isArrived;}
     public void setArrived(boolean arrived) {isArrived = arrived;}
-
-    public synchronized boolean isNavigate() {return isNavigate;}
-    public void setNavigate(boolean navigate) {isNavigate = navigate;}
 
     public Car(){
         this.fsb = 2;
@@ -104,7 +99,7 @@ public class Car {//класс-модель платформы
         return numberInList;
     }
 
-    public String getMessage(){
+    public synchronized String getMessage(){
         String message = "";
         if(mode == 0){
             message = "b1/" + String.valueOf(fsb) + String.valueOf(lfr) + String.valueOf(speed)+ "/e";
@@ -114,6 +109,7 @@ public class Car {//класс-модель платформы
         }
         return message;
     }
+
     public synchronized  byte getspeedLimit(){
         return speedLimit;
     }
@@ -125,7 +121,7 @@ public class Car {//класс-модель платформы
         speedLimit = lim;
     }
 
-    public void parseStatus(String[] sArr){
+    public synchronized  void parseStatus(String[] sArr){
 
         synchronized (this){
             if(sArr[1].equals("0")){

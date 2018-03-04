@@ -74,9 +74,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
     public Car car;//модель платформы
     public CarTransmitter transmitter;//передатчик
-    public CarDDAppForm form;
     public VideoCoordinator coordinator;
-    public Grid grid;
+    public static Grid grid;
 
     private boolean isGettingFieldCoordinates = false;
     private boolean luc_rdc_clicks = true;// true - left up corner    false - right down corner
@@ -88,10 +87,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         car = new Car();//создание объекта - модели платформы
 
         this.init();//создание формы
-        form = this;
+
         setFocusable(true);
         requestFocusInWindow();
-
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
 
         //here is an info about real field, shown at image
@@ -99,7 +97,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(0,grid,"settings.txt");
+            coordinator = new VideoCoordinator(0,"settings.txt");
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());
@@ -207,9 +205,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                         transmitter = null;
                         setIP(CON_LOST,false,IP);
                         connect.setText("Connect");
-                        if(car.isNavigate())
-                            calibrColors.doClick();
-                                            }
+                     }
                 } catch (IOException ex){}
 
             }
@@ -267,24 +263,23 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         upSpeed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String s = speed.getText();
-                int angle  = new Integer(s);
-                angle++;
-                if(angle  > car.getspeedLimit())
-                    angle = car.getspeedLimit();
-                car.setSpeed((byte) angle);
-                speed.setText(String.valueOf(angle));
+                int speed  = new Integer(CarDDAppForm.this.speed.getText());
+                speed++;
+                if(speed  > car.getspeedLimit())
+                    speed = car.getspeedLimit();
+                car.setSpeed((byte) speed);
+                CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
         downSpeed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int angle  = new Integer(speed.getText());
-                angle--;
-                if (angle <= 0)
-                    angle = 0;
-                car.setSpeed((byte) angle);
-                speed.setText(String.valueOf(angle));
+                int speed  = new Integer(CarDDAppForm.this.speed.getText());
+                speed--;
+                if (speed <= 0)
+                    speed = 0;
+                car.setSpeed((byte) speed);
+                CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
         mode0RB.addActionListener(new ActionListener() {
@@ -297,13 +292,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         mode1RB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*if (!car.isNavigate()){
-                    JOptionPane.showMessageDialog(null,"Данный режим не работает без навигации.");
-                    mode0RB.doClick();
-                    return;
-                }*/
+                car.setMode((byte)1);
                 goToPanel.show();
-                //car.setMode((byte)1);
             }
         });
 
@@ -373,9 +363,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     upSpeed.doClick();
                 if(e.getKeyCode() == KeyEvent.VK_SUBTRACT)
                     downSpeed.doClick();
-                if(e.getKeyCode() == KeyEvent.VK_W)
-                    CrazyFactory.EnterPresed = true;
-                //System.out.println(CrazyFactory.EnterPresed );
+//                if(e.getKeyCode() == KeyEvent.VK_W)
+//                    CrazyFactory.EnterPresed = true;
+
             }
             if(e.getID() == KeyEvent.KEY_RELEASED){//отпускане
                 if (e.getKeyCode() == 38 | e.getKeyCode() == 40)
@@ -407,7 +397,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
     }
 
-    //функция обновления информации о координатах
+    //функция обновления информации о координатах в таблице
     public void setObjCoordinates(ArrayList<ObjOnImage> objs){
         //refreshing table data
         for(int i = 0; i < objs.size();i++){
@@ -434,13 +424,6 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         }catch (IllegalAccessError ex){
             System.out.println(ex.getMessage());
         }
-    }
-
-    public void syncModelAndRealObjCoord(){
-        if(this.coordinator.objectsToTrack.size() == 0)
-            return;
-        this.car.setX(coordinator.objectsToTrack.get(car.getNumberInList()).getxPos());
-        this.car.setY(coordinator.objectsToTrack.get(car.getNumberInList()).getyPos());
     }
 
     public void update(){
