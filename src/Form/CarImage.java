@@ -1,6 +1,6 @@
 package Form;
 
-import Car.Car;
+import Car.BotModel;
 
 import java.awt.*;
 
@@ -14,13 +14,13 @@ public class CarImage {
      int area_with;
 
 
-    private Car car;
-    public CarImage(Car car,int h,int w)
+    private BotModel botModel;
+    public CarImage(BotModel botModel, int h, int w)
     {
         super();
         this.area_heigh = h;
         this.area_with = w;
-        this.car = car;
+        this.botModel = botModel;
         this.diam = 12;
         this.ort = 10;
     }
@@ -45,12 +45,12 @@ public class CarImage {
         int xCoor = 0;
         int yCoor = 0;
 
-        synchronized (car){
-            if (car != null){
-                xCoor = map(car.getX(),0,150,0,area_with);
-                yCoor = map(car.getY(),0,200,0,area_heigh);
-                x2L = (int)(ort*Math.sin(car.getAzimut()*Math.PI/180.0)) + xCoor;
-                y2L = -(int)(ort*Math.cos(car.getAzimut()*Math.PI/180.0)) + yCoor;
+        synchronized (botModel){
+            if (botModel != null){
+                xCoor = map(botModel.getX(),0,150,0,area_with);
+                yCoor = map(botModel.getY(),0,200,0,area_heigh);
+                x2L = (int)(ort*Math.sin(botModel.getAzimut()*Math.PI/180.0)) + xCoor;
+                y2L = -(int)(ort*Math.cos(botModel.getAzimut()*Math.PI/180.0)) + yCoor;
 
 
             }else {

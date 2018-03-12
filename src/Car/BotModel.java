@@ -2,10 +2,12 @@ package Car;
 
 import Coordinator.ObjOnImage;
 
+import java.text.ParseException;
+
 /**
  * Created by Александр on 26.10.2016.
  */
-public class Car {//класс-модель платформы
+public class BotModel {//класс-модель платформы
 
     private byte fsb;//1 - back; 2 - stop; 3 - forward
     private byte lfr;//1 - left; 2 - forward; 3 - right
@@ -21,12 +23,30 @@ public class Car {//класс-модель платформы
     private int ydest;
 
     private String IP;
-    private int port;
+    private  int port;
     ObjOnImage carOnImage;
 
     private int numberInList = 0;
 
     private byte mode;//0 - просто управление, 1 - следование в точку
+
+    public BotModel(){
+        this.fsb = 2;
+        this.lfr = 2;
+        this.speed = 0;
+        this.isArrived = false;
+        this.x = 0;
+        this.y = 0;
+        this.azimut = 0;
+        this.IP = "";
+        this.port = 777;
+        this.mode = 0;
+        this.speedLimit = 9;
+    }
+    public BotModel(int port){
+        this();
+        this.port = port;
+    }
 
 
     public String getIP() {
@@ -76,19 +96,6 @@ public class Car {//класс-модель платформы
     public boolean isArrived() {return isArrived;}
     public void setArrived(boolean arrived) {isArrived = arrived;}
 
-    public Car(){
-        this.fsb = 2;
-        this.lfr = 2;
-        this.speed = 0;
-        this.isArrived = false;
-        this.x = 6;
-        this.y = 1;
-        this.azimut = 0;
-        this.IP = "";
-        this.port = 777;
-        this.mode = 0;
-        this.speedLimit = 9;
-    }
     public synchronized byte goForward(){    fsb = 3; return fsb;    }
     public synchronized byte goBack(){   fsb = 1; return fsb;    }
     public synchronized byte stop(){ fsb = 2; return fsb;    }
@@ -124,15 +131,19 @@ public class Car {//класс-модель платформы
     public synchronized  void parseStatus(String[] sArr){
 
         synchronized (this){
-            if(sArr[1].equals("0")){
-                this.setArrived(false);
-            }
-            if (sArr[1].equals("1")){
-                this.setArrived(true);
-            }
+            try {
+                if(sArr[1].equals("0")){
+                    this.setArrived(false);
+                }
+                if (sArr[1].equals("1")){
+                    this.setArrived(true);
+                }
 
-            int azimut = new Integer(sArr[2]);
-            this.setAzimut(azimut);
+                int azimut = new Integer(sArr[2]);
+                this.setAzimut(azimut);
+            }catch (ArrayIndexOutOfBoundsException ex){
+                System.out.println("Ошибка парсинга статуса sArr.size= " + sArr.length);
+            }
         }
 
     }

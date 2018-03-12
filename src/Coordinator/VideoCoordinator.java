@@ -87,6 +87,7 @@ public class VideoCoordinator extends Thread {
 
     public VideoCoordinator(int cameraNum)throws AccessException{
         super();
+        this.setName("VideoCooordinator");
         System.out.println(Core.VERSION);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 

@@ -55,17 +55,18 @@ public class MainClass {
 
 
 
-    public static void main (String args[]) throws AccessException,InterruptedException{
+    public static void main (String args[]) throws AccessException{
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.out.println(Core.VERSION);
 
         CarDDAppForm form = new CarDDAppForm("Window");
-        form.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        try {
+            while (true){
+                form.update();
+            }
+        }catch (NullPointerException ex){}
 
-        while (form.isShowing()){
-            form.update();
-        }
     }
 
 

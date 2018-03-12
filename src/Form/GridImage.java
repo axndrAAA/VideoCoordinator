@@ -1,7 +1,5 @@
 package Form;
 
-import Car.Car;
-
 import java.awt.*;
 
 /**

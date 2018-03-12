@@ -1,5 +1,5 @@
 package Labitint;
-import Car.Car;
+import Car.BotModel;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -106,10 +106,10 @@ public class CrazyFactory {
         return squareList;
     }
 
-    //Car myCar - виртуальная модель робота
+    //BotModel myBotModel - виртуальная модель робота
     //int err - допустимая ошибка определения местоположения
     //Square endingSqr - клетка, содержащая x и y точки выхода из лабиринта
-    public static void runWarMachine(Car myCar, Square[] squareList, int err, Square endingSqr) {
+    public static void runWarMachine(BotModel myBotModel, Square[] squareList, int err, Square endingSqr) {
         int curPoint = 0;// Номер точки, в которой мы находимся
         int nextPoint = 0; //Номер точки,к которой мы направляемся
         int reqAz = 0; //Азимут на следующую точку
@@ -119,14 +119,14 @@ public class CrazyFactory {
             CrazyFactory.EnterPresed = false;
             nextPoint = curPoint + 1;
             //Если несколько клеток распологаются по прямой - делаем серию, следуя сразу к последней её клетке. Серия может быть либо по x, либо по y
-            if (squareList[nextPoint].getX() == myCar.getX()) {    //Пытаемся сделать серию по x
-                while (squareList[nextPoint + 1].getX() == myCar.getX()) {
+            if (squareList[nextPoint].getX() == myBotModel.getX()) {    //Пытаемся сделать серию по x
+                while (squareList[nextPoint + 1].getX() == myBotModel.getX()) {
                     nextPoint++;
                     if (squareList[nextPoint].equals(endingSqr))
                         break;//Проверяем, является ли крайний квадрат в серии конечной точкой
                 }
-            } else if (squareList[nextPoint].getY() == myCar.getY()) {//Пытаемся сделать серию по y
-                while (squareList[nextPoint + 1].getY() == myCar.getY()) {
+            } else if (squareList[nextPoint].getY() == myBotModel.getY()) {//Пытаемся сделать серию по y
+                while (squareList[nextPoint + 1].getY() == myBotModel.getY()) {
                     nextPoint++;
                     if (squareList[nextPoint].equals(endingSqr))
                         break;//Проверяем, является ли крайний квадрат в серии конечной точкой
@@ -134,55 +134,55 @@ public class CrazyFactory {
             }
             nextSqr = squareList[nextPoint];
             //Ищем нужный азимут
-            if (nextSqr.getX() == myCar.getX()) {
-                if (nextSqr.getY() > myCar.getY()) {
+            if (nextSqr.getX() == myBotModel.getX()) {
+                if (nextSqr.getY() > myBotModel.getY()) {
                     reqAz = 90;
-                } else if (nextSqr.getY() < myCar.getY()) {
+                } else if (nextSqr.getY() < myBotModel.getY()) {
                     reqAz = 270;
                 }
-            } else if (nextSqr.getY() == myCar.getY()) {
-                if (nextSqr.getX() > myCar.getX()) {
+            } else if (nextSqr.getY() == myBotModel.getY()) {
+                if (nextSqr.getX() > myBotModel.getX()) {
                     reqAz = 0;
-                } else if (nextSqr.getX() < myCar.getX()) {
+                } else if (nextSqr.getX() < myBotModel.getX()) {
                     reqAz = 180;
                 }
             }
             //Поворачиваем
-            difference = reqAz - myCar.getAzimut();
+            difference = reqAz - myBotModel.getAzimut();
             if (difference != 0) {
                 switch (Math.abs(difference)) {
                     case 90: {
-                        if (difference < 0) myCar.turnRight();
-                        else myCar.turnLeft();
+                        if (difference < 0) myBotModel.turnRight();
+                        else myBotModel.turnLeft();
                     }
                     break;
                     case 180: {
-                        myCar.turnRight();
-                        myCar.turnRight();
+                        myBotModel.turnRight();
+                        myBotModel.turnRight();
 
                     }
                     break;
                     case 270: {
                         if (difference < 0)
-                            myCar.turnLeft();
+                            myBotModel.turnLeft();
                         else
-                            myCar.turnRight();
+                            myBotModel.turnRight();
                     }
                     break;
                 }
                 //Даем команду на старт
-                myCar.goForward();
-//                while (Math.abs(myCar.getX() - nextSqr.getX()) > err || Math.abs(myCar.getY() - nextSqr.getY()) > err) {//Условие - ошибка больше допустимой
+                myBotModel.goForward();
+//                while (Math.abs(myBotModel.getX() - nextSqr.getX()) > err || Math.abs(myBotModel.getY() - nextSqr.getY()) > err) {//Условие - ошибка больше допустимой
 //                    //просто крутим цикл, пока не доедем
 //                }
                 while (!CrazyFactory.EnterPresed){
 
                 }
                 CrazyFactory.EnterPresed = false;
-                myCar.stop();
+                myBotModel.stop();
                 curPoint = nextPoint;
-                myCar.setX(squareList[curPoint].getX());
-                myCar.setX(squareList[curPoint].getY());
+                myBotModel.setX(squareList[curPoint].getX());
+                myBotModel.setX(squareList[curPoint].getY());
             }
 
         }
