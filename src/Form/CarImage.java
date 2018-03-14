@@ -1,6 +1,6 @@
 package Form;
 
-import Car.BotModel;
+import Bot.BotModel;
 
 import java.awt.*;
 

@@ -5,7 +5,7 @@ import org.opencv.core.Scalar;
 
 import java.awt.*;
 
-public class ObjOnImage {
+public class BotOnImage {
 
     private int xPos, yPos;
     private int xRealPos, yRealPos;
@@ -17,23 +17,42 @@ public class ObjOnImage {
     public static int objCount = 1;
 
 
-    public ObjOnImage(){
+    public BotOnImage(){
         this.number = 0;
         this.name = "null";
         this.colour = new Scalar(0,0,0);
     }
-    public ObjOnImage(Scalar hsv_min, Scalar hsv_max){
+    public BotOnImage(Scalar hsv_min, Scalar hsv_max){
         this.number = objCount++;
         this.name = "obj";
         HSVmax = hsv_max;
         HSVmin = hsv_min;
         this.colour = new Scalar(0,0,0);
     }
-    public ObjOnImage(int _num, String _name, Scalar hsv_min, Scalar hsv_max, Scalar _colrRGB){
+    public BotOnImage(int _num, String _name, Scalar hsv_min, Scalar hsv_max, Scalar _colrRGB){
         this(hsv_min,hsv_max);
         this.number = _num;
         this.name = _name;
         this.colour = _colrRGB;
+    }
+
+    public BotOnImage(String str){
+        String[] params = str.split(" ");
+        int number = Integer.valueOf(params[0]);
+        Scalar hsv_min = new Scalar(Double.parseDouble(params[2]),
+                Double.parseDouble(params[3]),
+                Double.parseDouble(params[4]));
+        Scalar hsv_max = new Scalar(Double.parseDouble(params[5]),
+                Double.parseDouble(params[6]),
+                Double.parseDouble(params[7]));
+        Scalar color = new Scalar(Double.parseDouble(params[8]),
+                Double.parseDouble(params[9]),
+                Double.parseDouble(params[10]));
+        this.number = number;
+        this.name = params[1];
+        this.HSVmin = hsv_min;
+        this.HSVmax = hsv_max;
+        this.colour = color;
     }
 
     @Override

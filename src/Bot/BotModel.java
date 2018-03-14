@@ -1,8 +1,6 @@
-package Car;
+package Bot;
 
-import Coordinator.ObjOnImage;
-
-import java.text.ParseException;
+import Coordinator.BotOnImage;
 
 /**
  * Created by Александр on 26.10.2016.
@@ -24,9 +22,8 @@ public class BotModel {//класс-модель платформы
 
     private String IP;
     private  int port;
-    ObjOnImage carOnImage;
 
-    private int numberInList = 0;
+    private BotOnImage botOnImage;
 
     private byte mode;//0 - просто управление, 1 - следование в точку
 
@@ -46,6 +43,10 @@ public class BotModel {//класс-модель платформы
     public BotModel(int port){
         this();
         this.port = port;
+    }
+    public BotModel(int port, BotOnImage boi){
+        this(port);
+        botOnImage = boi;
     }
 
 
@@ -96,15 +97,16 @@ public class BotModel {//класс-модель платформы
     public boolean isArrived() {return isArrived;}
     public void setArrived(boolean arrived) {isArrived = arrived;}
 
+    public BotOnImage getBotOnImage() {return botOnImage;}
+    public void setBotOnImage(BotOnImage botOnImage) {this.botOnImage = botOnImage;}
+
+
     public synchronized byte goForward(){    fsb = 3; return fsb;    }
     public synchronized byte goBack(){   fsb = 1; return fsb;    }
     public synchronized byte stop(){ fsb = 2; return fsb;    }
     public synchronized byte turnLeft(){ lfr = 1; return lfr;    }
     public synchronized byte turnRight(){    lfr = 3;return lfr;}
     public synchronized byte goStraight(){   lfr = 2; return lfr; }
-    public synchronized int getNumberInList() {
-        return numberInList;
-    }
 
     public synchronized String getMessage(){
         String message = "";

@@ -1,4 +1,4 @@
-package Car;
+package Bot;
 
 import java.io.*;
 import java.net.ServerSocket;

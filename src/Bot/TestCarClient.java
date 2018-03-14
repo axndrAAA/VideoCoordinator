@@ -1,13 +1,9 @@
-package Car;
+package Bot;
 
-import javax.swing.*;
-import javax.swing.text.DefaultCaret;
-import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Properties;
 
 /**

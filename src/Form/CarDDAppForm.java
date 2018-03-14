@@ -12,14 +12,13 @@ import java.io.IOException;
 import java.rmi.AccessException;
 import java.util.ArrayList;
 
-import Car.BotTransmitter;
-import Car.ObjectsManager;
+import Bot.BotsManager;
 import Labitint.CrazyFactory;
 import Labitint.Square;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import Coordinator.Imshow;
-import Coordinator.ObjOnImage;
+import Coordinator.BotOnImage;
 import Coordinator.VideoCoordinator;
 
 /**
@@ -72,7 +71,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     };
 
     //public BotModel botModel;//модель платформы
-    public ObjectsManager objectsManager;//объект, содержащий список всех передатчиков и привязанных к ним моделей
+    public BotsManager botsManager;//объект, содержащий список всех передатчиков и привязанных к ним моделей
                                         // и управляющий всем этим дерьмом
     //public BotTransmitter transmitter;//передатчик
     public VideoCoordinator coordinator;
@@ -85,8 +84,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     //конструктор
     public CarDDAppForm(String name){
         super(name);
-        //car = new BotModel();//создание объекта - модели платформы
-        objectsManager = new ObjectsManager(1);//создание объектов платформ, передатчиков для них и их запуск
+        //создание объектов платформ, передатчиков для них и их запуск
+        botsManager = new BotsManager(1,"settings.txt");
 
         this.init();//создание формы
 
@@ -261,9 +260,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             public void actionPerformed(ActionEvent e) {
                 int speed  = new Integer(CarDDAppForm.this.speed.getText());
                 speed++;
-                if(speed  > objectsManager.getGlobalSpeedLimit())
-                    speed = objectsManager.getGlobalSpeedLimit();
-                objectsManager.setGlobalSpeedLimit((byte) speed);
+                if(speed  > botsManager.getGlobalSpeedLimit())
+                    speed = botsManager.getGlobalSpeedLimit();
+                botsManager.setGlobalSpeedLimit((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
@@ -274,7 +273,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 speed--;
                 if (speed <= 0)
                     speed = 0;
-                objectsManager.setGlobalSpeedLimit((byte) speed);
+                botsManager.setGlobalSpeedLimit((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
@@ -386,9 +385,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             try {
                 int Answer = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (Answer == JOptionPane.YES_OPTION) {
-                    objectsManager.closeConnection(-1);
+                    botsManager.closeConnection(-1);
                     coordinator.interrupt();
-                    objectsManager = null;
+                    botsManager = null;
                     coordinator = null;
                     System.exit(0);
                 }
@@ -416,7 +415,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     }
 
     //функция обновления информации о координатах в таблице
-    public void setObjCoordinates(ArrayList<ObjOnImage> objs){
+    public void setObjCoordinates(ArrayList<BotOnImage> objs){
         //refreshing table data
         for(int i = 0; i < objs.size();i++){
             this.table.setValueAt(Integer.toString(objs.get(i).getRGBColor().getRed()) + ";" +

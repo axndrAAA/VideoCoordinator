@@ -1,9 +1,11 @@
-package Car;
+package Bot;
 
-import java.io.IOException;
+import Coordinator.BotOnImage;
+
+import java.io.*;
 import java.util.ArrayList;
 
-public class ObjectsManager {
+public class BotsManager {
     //класс содержит список платформ,и способен осуществлять управление каждой из них
 
     private ArrayList<BotTransmitter> bots;
@@ -11,11 +13,12 @@ public class ObjectsManager {
     private byte globalSpeedLimit;
 
 
-    public ObjectsManager(int numberOfObj){
-        bots = new ArrayList<BotTransmitter>(numberOfObj);
+    public BotsManager(int numberOfBots){
+
+        bots = new ArrayList<BotTransmitter>(numberOfBots);
         int ref_port = 778;
         int tryCount = 0;
-        for(int i = 0; i < numberOfObj; i++){
+        for(int i = 0; i < numberOfBots; i++){
             BotModel model;
             BotTransmitter transmitter;
             tryCount = 0;
@@ -44,6 +47,27 @@ public class ObjectsManager {
         }
 
     }
+
+    public BotsManager(int numberOfBots,String settingsFileParth){
+        this(numberOfBots);
+
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(settingsFileParth)));
+            String str;
+            reader.readLine();//вычитывание заголовочной строки
+
+            for (int i = 0; i < bots.size();i++){
+                str = reader.readLine();
+                BotOnImage boi =  new BotOnImage(str);
+                bots.get(i).getBotModel().setBotOnImage(boi);
+            }
+        }catch (FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }catch (IOException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
     public ArrayList<BotTransmitter> getBotsList() {
         return bots;
     }
@@ -56,6 +80,7 @@ public class ObjectsManager {
             botTransmitter.getBotModel().setSpeedLimit(globalSpeedLimit);
         }
     }
+
     public void closeConnection(int conNumber){
         if(conNumber < 0){
             for (BotTransmitter bt:bots) {
@@ -69,5 +94,9 @@ public class ObjectsManager {
         }catch (IndexOutOfBoundsException ex){
             System.out.println(ex.getMessage());
         }
+    }
+
+    public BotModel getBot(int i)throws IndexOutOfBoundsException{
+        return bots.get(i).getBotModel();
     }
 }

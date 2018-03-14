@@ -1,6 +1,5 @@
 package Coordinator;
 
-import Form.CalibrationWindow;
 import Form.CarDDAppForm;
 import Form.Grid;
 import org.opencv.core.*;
@@ -51,7 +50,7 @@ public class VideoCoordinator extends Thread {
 
     private VideoCapture capture;
     public Grid grid;
-    public ArrayList<ObjOnImage> objectsToTrack;
+    public ArrayList<BotOnImage> objectsToTrack;
 
     private Mat cameraFeed;
     private Imshow threshShow;
@@ -91,7 +90,7 @@ public class VideoCoordinator extends Thread {
         System.out.println(Core.VERSION);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        this.objectsToTrack = new  ArrayList<ObjOnImage>();
+        this.objectsToTrack = new  ArrayList<BotOnImage>();
         this.capture = new VideoCapture(cameraNum);
         this.grid = CarDDAppForm.grid;
         if(!this.capture.isOpened()){
@@ -157,7 +156,7 @@ public class VideoCoordinator extends Thread {
             String str = new String();
             reader.readLine();
             while ((str = reader.readLine()) != null){
-               ObjOnImage obj =  parseObjFromFile(str);
+               BotOnImage obj =  parseObjFromFile(str);
                objectsToTrack.add(obj);
             }
         }catch (FileNotFoundException ex){
@@ -167,7 +166,7 @@ public class VideoCoordinator extends Thread {
         }
     }
 
-    public ObjOnImage parseObjFromFile(String str){
+    public BotOnImage parseObjFromFile(String str){
         String[] params = str.split(" ");
         int number = Integer.valueOf(params[0]);
         Scalar hsv_min = new Scalar(Double.parseDouble(params[2]),
@@ -179,7 +178,7 @@ public class VideoCoordinator extends Thread {
         Scalar color = new Scalar(Double.parseDouble(params[8]),
                                     Double.parseDouble(params[9]),
                                     Double.parseDouble(params[10]));
-        return new ObjOnImage(number,params[1],hsv_min,hsv_max,color);
+        return new BotOnImage(number,params[1],hsv_min,hsv_max,color);
     }
 
     private void morphOps(Mat thresh){
@@ -194,7 +193,7 @@ public class VideoCoordinator extends Thread {
 
     }
 
-    public void drawObjectOnScreen(ObjOnImage objects, Mat frame){
+    public void drawObjectOnScreen(BotOnImage objects, Mat frame){
 
             Imgproc.circle(frame,new Point(objects.getxPos(),objects.getyPos()),
                     10,new Scalar(0,0,255));
@@ -221,13 +220,13 @@ public class VideoCoordinator extends Thread {
             int numObjects = hierarcy.rows();
             //if number of objects greater than MAX_NUM_OBJECTS we have a noisy filter
             if(numObjects<MAX_NUM_OBJECTS){
-                ObjOnImage car = null;
+                BotOnImage car = null;
                 for (int index = 0; index >= 0; index = (int)hierarcy.get(index,0)[0]){
                     Moments moment = new Moments();
                     moment = Imgproc.moments(contours.get(index),false);
                     double area = moment.get_m00();
                     if(area>MIN_OBJECT_AREA){
-                        car = new ObjOnImage();
+                        car = new BotOnImage();
                         car.setxPos((int)(moment.m10/area));
                         car.setyPos((int)(moment.m01/area));
                         car.getRealCoordinates(cameraHeigh,cameraFocus,grid);
@@ -247,7 +246,7 @@ public class VideoCoordinator extends Thread {
 
     }
 
-    private void trackFilteredObject(ObjOnImage theCar, Mat thresh, Mat HSV, Mat cameraFeed){
+    private void trackFilteredObject(BotOnImage theCar, Mat thresh, Mat HSV, Mat cameraFeed){
 
         Mat temp = new Mat();;
         thresh.copyTo(temp);
@@ -299,7 +298,7 @@ public class VideoCoordinator extends Thread {
             return;
         }
         if(calibrationWindow.isSetupOk()){
-            ObjOnImage obj = new ObjOnImage(new Scalar(H_MIN,S_MIN,V_MIN),new Scalar(H_MAX,S_MAX,V_MAX));
+            BotOnImage obj = new BotOnImage(new Scalar(H_MIN,S_MIN,V_MIN),new Scalar(H_MAX,S_MAX,V_MAX));
             objectsToTrack.add(obj);
             calibrationWindow.setSetupOk(false);
         }

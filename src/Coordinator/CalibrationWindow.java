@@ -1,4 +1,4 @@
-package Form;
+package Coordinator;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

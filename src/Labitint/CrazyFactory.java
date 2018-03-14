@@ -1,5 +1,5 @@
 package Labitint;
-import Car.BotModel;
+import Bot.BotModel;
 
 import java.io.FileWriter;
 import java.io.IOException;
