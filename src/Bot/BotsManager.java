@@ -3,6 +3,7 @@ package Bot;
 import Coordinator.BotOnImage;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 public class BotsManager {
@@ -16,7 +17,7 @@ public class BotsManager {
     public BotsManager(int numberOfBots){
 
         bots = new ArrayList<BotTransmitter>(numberOfBots);
-        int ref_port = 778;
+        int ref_port = 779;
         int tryCount = 0;
         for(int i = 0; i < numberOfBots; i++){
             BotModel model;
@@ -50,9 +51,10 @@ public class BotsManager {
 
     public BotsManager(int numberOfBots,String settingsFileParth){
         this(numberOfBots);
-
+        //settingsFileParth - файл с настройками параметров для трекинга объектов.\
+        BufferedReader reader = null;
         try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(settingsFileParth)));
+             reader = new BufferedReader(new InputStreamReader(new FileInputStream(settingsFileParth)));
             String str;
             reader.readLine();//вычитывание заголовочной строки
 
@@ -63,9 +65,19 @@ public class BotsManager {
             }
         }catch (FileNotFoundException ex){
             System.out.println(ex.getMessage());
+        }catch (NumberFormatException ex){
+            System.out.println("Файл настроек трекинга поврежден, или не заполнен");
+            System.out.println(ex.getMessage());
+            try {
+                reader.close();
+            }catch (IOException exep){}
         }catch (IOException ex){
             System.out.println(ex.getMessage());
-        }
+        }catch (NullPointerException ex){}
+    }
+
+    public BotsManager(String settingsFileParth){
+        this(countBotsInFile(settingsFileParth),settingsFileParth);
     }
 
     public ArrayList<BotTransmitter> getBotsList() {
@@ -98,5 +110,37 @@ public class BotsManager {
 
     public BotModel getBot(int i)throws IndexOutOfBoundsException{
         return bots.get(i).getBotModel();
+    }
+
+    public void saveTrackingSettingsToFile(){
+        String fileName = "settings.txt";
+        try {
+            FileWriter writer = new FileWriter(fileName,false);
+            writer.write("//Последние параметры трекига(num name Hmin Smin Vmin Hmax Smax Vmax colorR colorG colorB)\n");
+            String curStr = " ";
+            for(int i = 0; i < bots.size();i++){
+                curStr = bots.get(i).getBotModel().getBotOnImage().toString();
+                writer.write(curStr + "\n");
+            }
+            writer.flush();
+            writer.close();
+        }catch (IOException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private static int countBotsInFile(String settingsFileParth){
+        int count = 0;
+        BufferedReader reader;
+        String str = "";
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(settingsFileParth)));
+            while (reader.readLine() != null){
+                count++;
+            }
+        }catch (FileNotFoundException ex){System.out.println(ex.getMessage());}
+        catch (IOException ex){System.out.println(ex.getMessage());}
+
+        return count - 1;
     }
 }

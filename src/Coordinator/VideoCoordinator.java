@@ -1,7 +1,9 @@
 package Coordinator;
 
+import Bot.BotsManager;
 import Form.CarDDAppForm;
 import Form.Grid;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.opencv.core.*;
 
 import org.opencv.core.Point;
@@ -50,7 +52,8 @@ public class VideoCoordinator extends Thread {
 
     private VideoCapture capture;
     public Grid grid;
-    public ArrayList<BotOnImage> objectsToTrack;
+
+    private BotsManager botsManager;
 
     private Mat cameraFeed;
     private Imshow threshShow;
@@ -59,10 +62,10 @@ public class VideoCoordinator extends Thread {
            try {
             FileWriter writer = new FileWriter(coordinatesOut,false);
             String curStr = " ";
-            for(int i = 0; i < objectsToTrack.size();i++){
-                curStr =Integer.toString(objectsToTrack.get(i).getNumber()) + " " +
-                        Integer.toString(objectsToTrack.get(i).getRealCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
-                        Integer.toString(objectsToTrack.get(i).getRealCoordinates(cameraHeigh,cameraFocus,grid).y);
+            for(int i = 0; i < botsManager.getBotsList().size();i++){
+                curStr =Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getNumber()) + " " +
+                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRealCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
+                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRealCoordinates(cameraHeigh,cameraFocus,grid).y);
                 writer.write(curStr + "\n");
             }
             writer.flush();
@@ -90,7 +93,7 @@ public class VideoCoordinator extends Thread {
         System.out.println(Core.VERSION);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        this.objectsToTrack = new  ArrayList<BotOnImage>();
+        //this.objectsToTrack = new  ArrayList<BotOnImage>();
         this.capture = new VideoCapture(cameraNum);
         this.grid = CarDDAppForm.grid;
         if(!this.capture.isOpened()){
@@ -105,9 +108,12 @@ public class VideoCoordinator extends Thread {
         threshShow = new Imshow(thresholdedWIndowName);
     }
 
-    public VideoCoordinator(int camNum,String fileParth)throws AccessException{
-        this(camNum);
-        loadSettingsFromFile(fileParth);
+    public VideoCoordinator(int cameraNum, BotsManager botsManager)throws AccessException{
+        this(cameraNum);
+        this.botsManager = botsManager;
+        //TODO необходим ввод параметров трекинга для уже имеющихся ботов, а также возможность перестройки...
+        //проверка на предмет заданных параметров
+
     }
 
     public void OperateCalibrationWindow(){
@@ -115,7 +121,7 @@ public class VideoCoordinator extends Thread {
             if(calibrationWindow != null){
                 return;
             }else{
-                calibrationWindow = new CalibrationWindow("Settings",H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX);
+                calibrationWindow = new CalibrationWindow(botsManager,H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX);
                 calibrationWindow.setVisible(true);
             }
         }else {
@@ -132,53 +138,7 @@ public class VideoCoordinator extends Thread {
     }
 
     private void saveSettings(){
-        String fileName = "settings.txt";
-        try {
-            FileWriter writer = new FileWriter(fileName,false);
-            writer.write("//Последние параметры трекига(num name Hmin Smin Vmin Hmax Smax Vmax colorR colorG colorB)\n");
-            String curStr = " ";
-            for(int i = 0; i < objectsToTrack.size();i++){
-                curStr = objectsToTrack.get(i).toString();
-                writer.write(curStr + "\n");
-            }
-            writer.flush();
-            writer.close();
-        }catch (IOException ex){
-            System.out.println(ex.getMessage());
-        }
-
-
-    }
-
-    private void loadSettingsFromFile(String fileName){
-        try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
-            String str = new String();
-            reader.readLine();
-            while ((str = reader.readLine()) != null){
-               BotOnImage obj =  parseObjFromFile(str);
-               objectsToTrack.add(obj);
-            }
-        }catch (FileNotFoundException ex){
-            System.out.println(ex.getMessage());
-        }catch (IOException ex){
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    public BotOnImage parseObjFromFile(String str){
-        String[] params = str.split(" ");
-        int number = Integer.valueOf(params[0]);
-        Scalar hsv_min = new Scalar(Double.parseDouble(params[2]),
-                                    Double.parseDouble(params[3]),
-                                    Double.parseDouble(params[4]));
-        Scalar hsv_max = new Scalar(Double.parseDouble(params[5]),
-                                    Double.parseDouble(params[6]),
-                                    Double.parseDouble(params[7]));
-        Scalar color = new Scalar(Double.parseDouble(params[8]),
-                                    Double.parseDouble(params[9]),
-                                    Double.parseDouble(params[10]));
-        return new BotOnImage(number,params[1],hsv_min,hsv_max,color);
+        this.botsManager.saveTrackingSettingsToFile();
     }
 
     private void morphOps(Mat thresh){
@@ -220,22 +180,22 @@ public class VideoCoordinator extends Thread {
             int numObjects = hierarcy.rows();
             //if number of objects greater than MAX_NUM_OBJECTS we have a noisy filter
             if(numObjects<MAX_NUM_OBJECTS){
-                BotOnImage car = null;
+                BotOnImage bot = null;
                 for (int index = 0; index >= 0; index = (int)hierarcy.get(index,0)[0]){
                     Moments moment = new Moments();
                     moment = Imgproc.moments(contours.get(index),false);
                     double area = moment.get_m00();
                     if(area>MIN_OBJECT_AREA){
-                        car = new BotOnImage();
-                        car.setxPos((int)(moment.m10/area));
-                        car.setyPos((int)(moment.m01/area));
-                        car.getRealCoordinates(cameraHeigh,cameraFocus,grid);
+                        bot = new BotOnImage();
+                        bot.setxPos((int)(moment.m10/area));
+                        bot.setyPos((int)(moment.m01/area));
+                        bot.getRealCoordinates(cameraHeigh,cameraFocus,grid);
                         objectFound = true;
                     }else
                         objectFound = false;
                 }
                 if(objectFound)
-                    drawObjectOnScreen(car,cameraFeed);
+                    drawObjectOnScreen(bot,cameraFeed);
             }else{
                 System.out.println("Too much noize. Adjust filter");
                 Imgproc.putText(cameraFeed,"Too much noize. Adjust filter",
@@ -246,7 +206,7 @@ public class VideoCoordinator extends Thread {
 
     }
 
-    private void trackFilteredObject(BotOnImage theCar, Mat thresh, Mat HSV, Mat cameraFeed){
+    private void trackFilteredObject(BotOnImage theBot, Mat thresh, Mat HSV, Mat cameraFeed){
 
         Mat temp = new Mat();;
         thresh.copyTo(temp);
@@ -268,15 +228,15 @@ public class VideoCoordinator extends Thread {
                     moment = Imgproc.moments(contours.get(index),false);
                     double area = moment.get_m00();
                     if(area>MIN_OBJECT_AREA){
-                        theCar.setxPos((int)(moment.m10/area));
-                        theCar.setyPos((int)(moment.m01/area));
-                        theCar.getRealCoordinates(cameraHeigh,cameraFocus,grid);
+                        theBot.setxPos((int)(moment.m10/area));
+                        theBot.setyPos((int)(moment.m01/area));
+                        theBot.getRealCoordinates(cameraHeigh,cameraFocus,grid);
                         objectFound = true;
                     }else
                         objectFound = false;
                 }
                 if(objectFound)
-                    drawObjectOnScreen(theCar,cameraFeed);
+                    drawObjectOnScreen(theBot,cameraFeed);
             }else{
                 System.out.println("Too much noize. Adjust filter");
                 Imgproc.putText(cameraFeed,"Too much noize. Adjust filter",
@@ -297,11 +257,7 @@ public class VideoCoordinator extends Thread {
         }else{
             return;
         }
-        if(calibrationWindow.isSetupOk()){
-            BotOnImage obj = new BotOnImage(new Scalar(H_MIN,S_MIN,V_MIN),new Scalar(H_MAX,S_MAX,V_MAX));
-            objectsToTrack.add(obj);
-            calibrationWindow.setSetupOk(false);
-        }
+
         if(calibrationWindow.isSetupOkAndFinished()){
             calibrationWindow.dispose();
             calibrationWindow= null;
@@ -335,17 +291,23 @@ public class VideoCoordinator extends Thread {
                     Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
                     Core.inRange(HSV,new Scalar(H_MIN,S_MIN,V_MIN),new Scalar(H_MAX,S_MAX,V_MAX),threshold);
                     morphOps(threshold);
+
                     threshShow.showImage(threshold);
                     trackFilteredObject(threshold,HSV,cameraFeed);
                 }else{
+                    //если параметры трекинга для бота не были введены - пропуск итерации и ожидание пока будет вызван процесс калибровки
+                    if(botsManager.getBot(0).getBotOnImage() == null)
+                        continue;
 
-                    for(int i = 0; i < objectsToTrack.size();i++){
+                    for(int i = 0; i < botsManager.getBotsList().size();i++){
                         Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
-                        Core.inRange(HSV,objectsToTrack.get(i).getHSVmin(),objectsToTrack.get(i).getHSVmax(),threshold);
+                        Core.inRange(HSV,botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getHSVmin(),
+                                         botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getHSVmax(),
+                                         threshold);
                         morphOps(threshold);
                         //Debug
                        // threshShow.showImage(threshold);
-                        trackFilteredObject(objectsToTrack.get(i),threshold,HSV,cameraFeed);
+                        trackFilteredObject(botsManager.getBotsList().get(i).getBotModel().getBotOnImage(),threshold,HSV,cameraFeed);
                     }
                     if(isWritingCoordinatesToFile)
                         writeCoordinatesToFile();

@@ -4,6 +4,8 @@ import Form.Grid;
 import org.opencv.core.Scalar;
 
 import java.awt.*;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 public class BotOnImage {
 
@@ -36,7 +38,7 @@ public class BotOnImage {
         this.colour = _colrRGB;
     }
 
-    public BotOnImage(String str){
+    public BotOnImage(String str)throws NumberFormatException{
         String[] params = str.split(" ");
         int number = Integer.valueOf(params[0]);
         Scalar hsv_min = new Scalar(Double.parseDouble(params[2]),
@@ -70,62 +72,61 @@ public class BotOnImage {
     public int getxPos() {
         return xPos;
     }
-
-    public int getyPos() {
-        return yPos;
+    public void setxPos(int xPos) {
+        this.xPos = xPos;
     }
+
 
     public String getName() {
         return name + " " + number;
     }
-
-    public Scalar getHSVmin() {
-        return HSVmin;
+    public void setName(String name) {
+        this.name = name;
     }
+
 
     public Scalar getHSVmax() {
         return HSVmax;
     }
+    public void setHSVmax(Scalar HSVmax) {
+        this.HSVmax = HSVmax;
+    }
+
 
     public Scalar getColour() {
         return colour;
     }
 
-    public void setxPos(int xPos) {
-        this.xPos = xPos;
+    public int getyPos() {
+        return yPos;
     }
-
     public void setyPos(int yPos) {
         this.yPos = yPos;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
+    public Scalar getHSVmin() {
+        return HSVmin;
+    }
     public void setHSVmin(Scalar HSVmin) {
         this.HSVmin = HSVmin;
-    }
-
-    public void setHSVmax(Scalar HSVmax) {
-        this.HSVmax = HSVmax;
     }
 
     public void setColour(Scalar colour) {
         this.colour = colour;
     }
+    public Color getRGBColor(){
+        return new Color((int)colour.val[0],(int)colour.val[1],(int)colour.val[2]);
+    }
+
 
     public int getNumber() {
         return number;
     }
-
     public void setNumber(int number) {
         this.number = number;
     }
 
-    public Color getRGBColor(){
-        return new Color((int)colour.val[0],(int)colour.val[1],(int)colour.val[2]);
-    }
 
     public Point getRealCoordinates(double cameraHeigh, double cameraFocus, Grid grid) {
 //        this.xRealPos = (int)((cameraHeigh*(xPos - grid.getUpLeftCorner().x)*0.02645833333333)/cameraFocus);
@@ -136,5 +137,19 @@ public class BotOnImage {
         //System.out.println(this.number + "   " + this.xRealPos + "   " + this.yRealPos);
 
         return new Point(this.xPos,this.yPos);
+    }
+
+    public ArrayList<Integer> getParametersList(){
+        ArrayList<Integer> ret = new ArrayList<Integer>(6);
+        ret.add(0, (Double.valueOf(HSVmin.val[0]).intValue()));
+        ret.add(1, (Double.valueOf(HSVmax.val[0]).intValue()));
+
+        ret.add(2, (Double.valueOf(HSVmin.val[1]).intValue()));
+        ret.add(3, (Double.valueOf(HSVmax.val[1]).intValue()));
+
+        ret.add(4, (Double.valueOf(HSVmin.val[2]).intValue()));
+        ret.add(5, (Double.valueOf(HSVmax.val[2]).intValue()));
+
+        return ret;
     }
 }

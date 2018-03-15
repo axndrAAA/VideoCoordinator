@@ -22,7 +22,7 @@ public class BotModel {//класс-модель платформы
 
     private String IP;
     private  int port;
-
+    private String name = "bot";
     private BotOnImage botOnImage;
 
     private byte mode;//0 - просто управление, 1 - следование в точку
@@ -49,6 +49,8 @@ public class BotModel {//класс-модель платформы
         botOnImage = boi;
     }
 
+    public String getName() {return name + port;}
+    public void setName(String name) {this.name = name;}
 
     public String getIP() {
         return IP;
@@ -84,6 +86,16 @@ public class BotModel {//класс-модель платформы
     public void setXdest(int xdest) {this.xdest = xdest;}
     public void setYdest(int ydest) {this.ydest = ydest;}
 
+    public synchronized  byte getspeedLimit(){
+        return speedLimit;
+    }
+    public synchronized void setSpeedLimit(byte lim ){
+        if(lim > 9)
+            lim = 9;
+        if(lim < 0)
+            lim =0;
+        speedLimit = lim;
+    }
 
     public synchronized int getAzimut() { return azimut;}
     public synchronized void setAzimut(int az) {this.azimut = az;}
@@ -117,17 +129,6 @@ public class BotModel {//класс-модель платформы
             message = "b2/" + String.valueOf(x) + "/" + String.valueOf(y) + "/" + String.valueOf(xdest) + "/" + String.valueOf(ydest) + "/e";
         }
         return message;
-    }
-
-    public synchronized  byte getspeedLimit(){
-        return speedLimit;
-    }
-    public synchronized void setSpeedLimit(byte lim ){
-        if(lim > 9)
-            lim = 9;
-        if(lim < 0)
-            lim =0;
-        speedLimit = lim;
     }
 
     public synchronized  void parseStatus(String[] sArr){

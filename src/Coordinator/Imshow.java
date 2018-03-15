@@ -37,21 +37,15 @@ public class Imshow {
         this.Window.setTitle(title);
         this.SizeCustom = false;
         this.setCloseOption(JFrame.HIDE_ON_CLOSE);
+        this.Window.setVisible(true);
+
     }
 
     public Imshow(String title, int height, int width) {
+        this(title);
         this.SizeCustom = true;
         this.Height = height;
         this.Width = width;
-        this.Window = new JFrame();
-        this.image = new ImageIcon();
-        this.label = new JLabel();
-        this.matOfByte = new MatOfByte();
-        this.label.setIcon(this.image);
-        this.Window.getContentPane().add(this.label);
-        this.Window.setResizable(false);
-        this.Window.setTitle(title);
-        this.setCloseOption(JFrame.HIDE_ON_CLOSE);
     }
 
     public void showImage(Mat img) {
@@ -67,7 +61,7 @@ public class Imshow {
             this.image.setImage(bufImage);
             this.Window.pack();
             this.label.updateUI();
-            this.Window.setVisible(true);
+            //this.Window.setVisible(true);
         } catch (Exception var4) {
             var4.printStackTrace();
         }

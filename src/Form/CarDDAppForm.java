@@ -85,7 +85,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     public CarDDAppForm(String name){
         super(name);
         //создание объектов платформ, передатчиков для них и их запуск
-        botsManager = new BotsManager(1,"settings.txt");
+//        botsManager = new BotsManager(2);
+        botsManager = new BotsManager("settings.txt");
 
         this.init();//создание формы
 
@@ -93,7 +94,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(0,"settings.txt");
+            coordinator = new VideoCoordinator(0,botsManager);
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());
@@ -383,14 +384,11 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         @Override
         public void windowClosing(WindowEvent e) {
             try {
-                int Answer = JOptionPane.showConfirmDialog(null, "Are you sure want to exit?", "Quit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                if (Answer == JOptionPane.YES_OPTION) {
                     botsManager.closeConnection(-1);
                     coordinator.interrupt();
                     botsManager = null;
                     coordinator = null;
                     System.exit(0);
-                }
             }catch (NullPointerException ex){}
         }
     };
@@ -415,16 +413,18 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     }
 
     //функция обновления информации о координатах в таблице
-    public void setObjCoordinates(ArrayList<BotOnImage> objs){
+    public void setObjCoordinates(){
         //refreshing table data
-        for(int i = 0; i < objs.size();i++){
-            this.table.setValueAt(Integer.toString(objs.get(i).getRGBColor().getRed()) + ";" +
-                                            Integer.toString(objs.get(i).getRGBColor().getGreen()) + ";" +
-                                                Integer.toString(objs.get(i).getRGBColor().getBlue())
-                                                                ,i,0);
-            this.table.setValueAt(Integer.toString(objs.get(i).getxPos()),i,1);
-            this.table.setValueAt(Integer.toString(objs.get(i).getyPos()),i,2);
-        }
+        try {
+            for(int i = 0; i < botsManager.getBotsList().size();i++){
+                this.table.setValueAt(Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRGBColor().getRed()) + ";" +
+                                Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRGBColor().getGreen()) + ";" +
+                                Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRGBColor().getBlue())
+                        ,i,0);
+                this.table.setValueAt(Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getxPos()),i,1);
+                this.table.setValueAt(Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getyPos()),i,2);
+            }
+        }catch (NullPointerException ex){}
     }
 
     //update image function
@@ -445,7 +445,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
     public void update(){
        updateImage();
-       setObjCoordinates(coordinator.objectsToTrack);
+       setObjCoordinates();
     }
 }
 
