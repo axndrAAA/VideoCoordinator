@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class BotOnImage {
 
     private int xPos, yPos;
-    private int xRealPos, yRealPos;
     private String name;
     private int number;
     private Scalar HSVmin, HSVmax;
@@ -125,18 +124,6 @@ public class BotOnImage {
     }
     public void setNumber(int number) {
         this.number = number;
-    }
-
-
-    public Point getRealCoordinates(double cameraHeigh, double cameraFocus, Grid grid) {
-//        this.xRealPos = (int)((cameraHeigh*(xPos - grid.getUpLeftCorner().x)*0.02645833333333)/cameraFocus);
-//        this.yRealPos = (int)((cameraHeigh*(yPos - grid.getUpLeftCorner().y)*0.02645833333333) / cameraFocus);
-        this.xRealPos = xPos - (int)grid.getUpLeftCorner().x;
-        this.yRealPos = yPos - (int)grid.getUpLeftCorner().y;
-        //Debug
-        //System.out.println(this.number + "   " + this.xRealPos + "   " + this.yRealPos);
-
-        return new Point(this.xPos,this.yPos);
     }
 
     public ArrayList<Integer> getParametersList(){

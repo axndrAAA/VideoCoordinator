@@ -1,9 +1,9 @@
 package Coordinator;
 
+import Bot.BotModel;
 import Bot.BotsManager;
 import Form.CarDDAppForm;
 import Form.Grid;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.opencv.core.*;
 
 import org.opencv.core.Point;
@@ -64,8 +64,8 @@ public class VideoCoordinator extends Thread {
             String curStr = " ";
             for(int i = 0; i < botsManager.getBotsList().size();i++){
                 curStr =Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getNumber()) + " " +
-                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRealCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
-                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getRealCoordinates(cameraHeigh,cameraFocus,grid).y);
+                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
+                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).y);
                 writer.write(curStr + "\n");
             }
             writer.flush();
@@ -189,7 +189,7 @@ public class VideoCoordinator extends Thread {
                         bot = new BotOnImage();
                         bot.setxPos((int)(moment.m10/area));
                         bot.setyPos((int)(moment.m01/area));
-                        bot.getRealCoordinates(cameraHeigh,cameraFocus,grid);
+                        //bot.getMetricCoordinates(cameraHeigh,cameraFocus,grid);
                         objectFound = true;
                     }else
                         objectFound = false;
@@ -206,7 +206,7 @@ public class VideoCoordinator extends Thread {
 
     }
 
-    private void trackFilteredObject(BotOnImage theBot, Mat thresh, Mat HSV, Mat cameraFeed){
+    private void trackFilteredObject(BotModel theBot, Mat thresh, Mat HSV, Mat cameraFeed){
 
         Mat temp = new Mat();;
         thresh.copyTo(temp);
@@ -228,15 +228,16 @@ public class VideoCoordinator extends Thread {
                     moment = Imgproc.moments(contours.get(index),false);
                     double area = moment.get_m00();
                     if(area>MIN_OBJECT_AREA){
-                        theBot.setxPos((int)(moment.m10/area));
-                        theBot.setyPos((int)(moment.m01/area));
-                        theBot.getRealCoordinates(cameraHeigh,cameraFocus,grid);
+                        //
+                        //здесь должна проводиться фильтрация
+                        theBot.setX((int)(moment.m10/area));
+                        theBot.setY((int)(moment.m01/area));
                         objectFound = true;
                     }else
                         objectFound = false;
                 }
                 if(objectFound)
-                    drawObjectOnScreen(theBot,cameraFeed);
+                    drawObjectOnScreen(theBot.getBotOnImage(),cameraFeed);
             }else{
                 System.out.println("Too much noize. Adjust filter");
                 Imgproc.putText(cameraFeed,"Too much noize. Adjust filter",
@@ -307,7 +308,7 @@ public class VideoCoordinator extends Thread {
                         morphOps(threshold);
                         //Debug
                        // threshShow.showImage(threshold);
-                        trackFilteredObject(botsManager.getBotsList().get(i).getBotModel().getBotOnImage(),threshold,HSV,cameraFeed);
+                        trackFilteredObject(botsManager.getBotsList().get(i).getBotModel(),threshold,HSV,cameraFeed);
                     }
                     if(isWritingCoordinatesToFile)
                         writeCoordinatesToFile();

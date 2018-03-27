@@ -1,6 +1,10 @@
 package Bot;
 
 import Coordinator.BotOnImage;
+import Coordinator.MedianFilter;
+import Form.Grid;
+
+import java.awt.*;
 
 /**
  * Created by Александр on 26.10.2016.
@@ -27,6 +31,9 @@ public class BotModel {//класс-модель платформы
 
     private byte mode;//0 - просто управление, 1 - следование в точку
 
+    private MedianFilter xFilter;
+    private MedianFilter yFilter;
+
     public BotModel(){
         this.fsb = 2;
         this.lfr = 2;
@@ -39,6 +46,8 @@ public class BotModel {//класс-модель платформы
         this.port = 777;
         this.mode = 0;
         this.speedLimit = 9;
+        this.xFilter = new MedianFilter(x);
+        this.yFilter = new MedianFilter(y);
     }
     public BotModel(int port){
         this();
@@ -103,8 +112,24 @@ public class BotModel {//класс-модель платформы
     public synchronized int getX() { return x;}
     public synchronized int getY() { return y;}
 
-    public synchronized void setX(int x) {this.x = x;}
-    public synchronized void setY(int y) {this.y = y;}
+    public synchronized void setX(int x) {
+        this.x = xFilter.getFilteredValue(x);
+        botOnImage.setxPos(this.x);
+    }
+    public synchronized void setY(int y) {
+        this.y = yFilter.getFilteredValue(y);
+        botOnImage.setyPos(this.y);
+    }
+
+    public Point getMetricCoordinates(double cameraHeigh, double cameraFocus, Grid grid) {
+        //метод должен возвращать координаты метки в сантимтрах
+//        this.xRealPos = (int)((cameraHeigh*(xPos - grid.getUpLeftCorner().x)*0.02645833333333)/cameraFocus);
+//        this.yRealPos = (int)((cameraHeigh*(yPos - grid.getUpLeftCorner().y)*0.02645833333333) / cameraFocus);
+        //Debug
+        //System.out.println(this.number + "   " + this.xRealPos + "   " + this.yRealPos);
+
+        return new Point(this.x,this.y);
+    }
 
     public boolean isArrived() {return isArrived;}
     public void setArrived(boolean arrived) {isArrived = arrived;}

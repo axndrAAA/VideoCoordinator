@@ -1,3 +1,2 @@
 //Последние параметры трекига(num name Hmin Smin Vmin Hmax Smax Vmax colorR colorG colorB)
 1 obj 7.0 124.0 46.0 170.0 0.0 251.0 0.0 0.0 0.0
-2 obj 7.0 124.0 46.0 170.0 0.0 251.0 0.0 0.0 0.0

@@ -1,6 +1,7 @@
 package Form;
 
 
+import Coordinator.MedianFilter;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
@@ -13,6 +14,7 @@ import java.awt.image.DataBufferByte;
 
 
 import java.rmi.AccessException;
+import java.util.Random;
 
 
 public class MainClass {
