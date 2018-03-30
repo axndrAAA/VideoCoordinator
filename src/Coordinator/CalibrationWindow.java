@@ -124,8 +124,8 @@ public class CalibrationWindow extends JFrame
             public void actionPerformed(ActionEvent e) {
                 int curObj = editCurBotSettings.getSelectedIndex();
                 botsManager.getBotsList().get(curObj).getBotModel().setBotOnImage(
-                        new BotOnImage(new Scalar(param.get(0),param.get(1),param.get(2)),
-                                       new Scalar(param.get(3),param.get(4),param.get(5))));
+                        new BotOnImage(new Scalar(param.get(0),param.get(2),param.get(4)),
+                                       new Scalar(param.get(1),param.get(3),param.get(5))));
             }
         });
         buttonPanel.add(addButton);

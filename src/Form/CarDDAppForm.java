@@ -90,11 +90,12 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         this.init();//создание формы
 
-        grid = new Grid(new Point(20,30),new Point(400,400));//here is an info about real field, shown at image
+        //grid = new Grid(new Point(20,30),new Point(400,400));//here is an info about real field, shown at image
+        grid = new Grid("gridSettings.txt");
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(0,botsManager);
+            coordinator = new VideoCoordinator(1,botsManager);
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());
@@ -306,6 +307,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                         grid.setDownRightCorner(new Point(x,y));
                         isGettingFieldCoordinates = false;
                         calibrCoordinates.setBackground(null);
+                        grid.saveSettingsToFile("gridSettings.txt");
                     }
                     luc_rdc_clicks = !luc_rdc_clicks;
                 }
