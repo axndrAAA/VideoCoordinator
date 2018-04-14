@@ -64,8 +64,8 @@ public class VideoCoordinator extends Thread {
             String curStr = " ";
             for(int i = 0; i < botsManager.getBotsList().size();i++){
                 curStr =Integer.toString(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getNumber()) + " " +
-                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
-                        Integer.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).y);
+                        Double.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).x) + " " +
+                        Double.toString(botsManager.getBotsList().get(i).getBotModel().getMetricCoordinates(cameraHeigh,cameraFocus,grid).y);
                 writer.write(curStr + "\n");
             }
             writer.flush();
@@ -74,6 +74,11 @@ public class VideoCoordinator extends Thread {
             System.out.println(ex.getMessage());
         }
     }
+
+    public int getFRAME_WIDTH() {return FRAME_WIDTH;}
+    public int getFRAME_HEIGHT() {return FRAME_HEIGHT;}
+
+
 
     public void setCalibrationMode(boolean calibrationMode) {
         this.calibrationMode = calibrationMode;

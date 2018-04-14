@@ -8,6 +8,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  * Created by Александр on 22.04.2017.
@@ -19,6 +20,10 @@ public class Grid {
     private int colsNumber;
     private Scalar color;
     private int thickness = 1;
+    private boolean isDrawingTrackPoints = false;
+    private ArrayList<Point> track;
+    private int trackPointsSize = 15;
+    private Scalar trackPointsColor = new Scalar(0,204,102);
 
     public Grid(Point upLeftCorner, Point downRightCorner, int rowsNumber, int colsNumber) {
         this.upLeftCorner = upLeftCorner;
@@ -96,35 +101,35 @@ public class Grid {
             int x = ((int)(this.getDownRightCorner().x - this.getUpLeftCorner().x)/this.getColsNumber())*j + (int)this.getUpLeftCorner().x;
             Imgproc.line(ret,new Point(x,this.getUpLeftCorner().y),new Point(x,this.getDownRightCorner().y),this.getColor(),this.getThickness());
         }
+        //track points
+        if(isDrawingTrackPoints){
+            for(int i = 0; i < track.size();i++){
+                Imgproc.circle(ret,new Point(track.get(i).x,track.get(i).y),
+                        trackPointsSize,trackPointsColor,-1);
+            }
+        }
 
     }
 
     public Point getUpLeftCorner() {
         return upLeftCorner;
     }
-
     public Point getDownRightCorner() {
         return downRightCorner;
     }
-
     public int getRowsNumber() {
         return rowsNumber;
     }
-
     public int getColsNumber() {
         return colsNumber;
     }
-
     public Scalar getColor() {
         return color;
     }
-
     public int getThickness() {
         return thickness;
     }
-
     public void setUpLeftCorner(Point upLeftCorner) {        this.upLeftCorner = upLeftCorner;    }
-
     public void setDownRightCorner(Point downRightCorner) {
         //check x
         if(downRightCorner.x < this.upLeftCorner.x )
@@ -138,17 +143,18 @@ public class Grid {
     public void setRowsNumber(int rowsNumber) {
         this.rowsNumber = rowsNumber;
     }
-
     public void setColsNumber(int colsNumber) {
         this.colsNumber = colsNumber;
     }
-
     public void setColor(Scalar color) {
         this.color = color;
     }
-
     public void setThickness(int thickness) {
         this.thickness = thickness;
+    }
+    public void showTrackPoints(boolean stat, ArrayList<Point> goodMap){
+        this.isDrawingTrackPoints = stat;
+        this.track = goodMap;
     }
 
     @Override
@@ -157,5 +163,13 @@ public class Grid {
         ret = upLeftCorner.x + " " + upLeftCorner.y + " " + downRightCorner.x + " " + downRightCorner.y + " "
                 + rowsNumber + " " + colsNumber;
         return  ret;
+    }
+
+    public int getXsquareSize(){
+        return  ((int)(this.getDownRightCorner().x - this.getUpLeftCorner().x)/this.getColsNumber());
+    }
+
+    public int getYsquareSize(){
+        return ((int)(this.getDownRightCorner().y - this.getUpLeftCorner().y)/this.getRowsNumber());
     }
 }

@@ -18,7 +18,6 @@ import Labitint.Square;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import Coordinator.Imshow;
-import Coordinator.BotOnImage;
 import Coordinator.VideoCoordinator;
 
 /**
@@ -26,8 +25,6 @@ import Coordinator.VideoCoordinator;
  */
 public class CarDDAppForm extends JFrame {//класс формы приложения
 
-    public JLabel IP;
-    public JButton connect;
     public JPanel modePanel;
     public JRadioButton mode0RB;
     public JRadioButton mode1RB;
@@ -46,17 +43,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
     //goto режим
     public JPanel goToPanel;
-    public JLabel gotoXLabel;
-    public JLabel gotoYLabel;
-    public JTextField goX;
-    public JTextField goY;
     public JButton goToBtn;
-
-
-
-
-    public static String CON_LOST = "Не соединено";
-    public static String CON_OK = "Соединено";
 
     private String[] columnNames = {
             "Color",
@@ -72,7 +59,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
     //public BotModel botModel;//модель платформы
     public BotsManager botsManager;//объект, содержащий список всех передатчиков и привязанных к ним моделей
-                                        // и управляющий всем этим дерьмом
+    // и управляющий всем этим дерьмом
     //public BotTransmitter transmitter;//передатчик
     public VideoCoordinator coordinator;
     public static Grid grid;
@@ -95,7 +82,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(1,botsManager);
+            coordinator = new VideoCoordinator(0,botsManager);
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());
@@ -108,18 +95,12 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
-        IP = new JLabel(CON_LOST);
-        IP.setForeground(Color.RED);
-        IP.setBackground(Color.GRAY);
-        IP.setOpaque(true);
-        IP.setVerticalAlignment(JLabel.TOP);
 
         isArrived = new JLabel("В пути");
         isArrived.setForeground(Color.RED);
         isArrived.setOpaque(true);
         isArrived.setVerticalAlignment(JLabel.TOP);
 
-        connect = new JButton("Соединить");
         upSpeed = new JButton(String.valueOf('↑'));
         downSpeed = new JButton(String.valueOf('↓'));
         speed = new JTextField(3);
@@ -152,16 +133,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         bordur = BorderFactory.createTitledBorder("GoTo");
         goToPanel.setBorder(bordur);
         goToPanel.setLayout(new GridLayout(3,2));
-        goToPanel.hide();
-        gotoXLabel = new JLabel("X: ");        gotoXLabel.setOpaque(true);
-        gotoYLabel = new JLabel("Y: ");        gotoYLabel.setOpaque(true);
-        goX = new JTextField(3);
-        goY = new JTextField(3);
         goToBtn = new JButton("Go");
-        goToPanel.add(gotoXLabel);
-        goToPanel.add(gotoYLabel);
-        goToPanel.add(goX);
-        goToPanel.add(goY);
         goToPanel.add(new JLabel());
         goToPanel.add(goToBtn);
 
@@ -171,42 +143,18 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         }catch (IOException ex){}
         map = new JMapArea(im);
 
-        map.setBounds(225,5,700,500);
-        IP.setBounds(5,5,125,20);
-        connect.setBounds(135,5,85,20);
-        modePanel.setBounds(5,30,125,90);
-        upSpeed.setBounds(135,30,45,45);
-        speed.setBounds(135,80,45,25);
-        downSpeed.setBounds(135,110,45,45);
-        isArrived.setBounds(5,125,125,20);
-        coordObjList.setBounds(5,160,215,90);
-        calibrColors.setBounds(5,255,82,20);
-        calibrCoordinates.setBounds(92,255,82,20);
-        goToPanel.setBounds(5,280,215,80);
+        map.setBounds(225,5,640,480);
+        modePanel.setBounds(5,5,125,90);
+        upSpeed.setBounds(135,5,45,45);
+        speed.setBounds(135,55,45,25);
+        downSpeed.setBounds(135,85,45,45);
+        isArrived.setBounds(5,100,125,20);
+        coordObjList.setBounds(5,135,215,90);
+        calibrColors.setBounds(5,230,82,20);
+        calibrCoordinates.setBounds(92,230,82,20);
+        goToPanel.setBounds(5,255,215,80);
 
-        //прослушивание кнопки connect
-        connect.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                try{
-//                    if(transmitter == null){
-//                        //создание и старт передатчика
-//                        transmitter = new BotTransmitter(car);
-//                        transmitter.start();
-//                        setIP("IP:" + car.getIP(),true,IP);
-//                        connect.setText("Disconnect");
-//
-//                    }else {
-//                        transmitter.restore();
-//                        transmitter.interrupt();
-//                        transmitter = null;
-//                        setIP(CON_LOST,false,IP);
-//                        connect.setText("Connect");
-//                     }
-//                } catch (IOException ex){}
 
-            }
-        });
 
         calibrColors.addActionListener(new ActionListener() {
             @Override
@@ -226,36 +174,30 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                try{
-//                    double x =  Double.parseDouble(goX.getText());
-//                    double y =  Double.parseDouble(goY.getText());
-//                    botModel.setYdest((int)y);
-//                    botModel.setXdest((int)x);
-//                    botModel.setMode((byte)1);
-//                }catch (NumberFormatException ex){
-//                    JOptionPane.showMessageDialog(null,"Не парсится:(" );//
-//                }
-                Square[] squareList;//Лист, в который будет записан путь
-                Square beginingSqr = new Square(6, 1);//Квдарат с координатами входа  в Лабиринт
-                Square endingSqr = new Square(6, 4); // Квадрат с координатами выхода из Лабиринта
-                int[][] mapArr = {
-                        {1, 1, 1, 1, 1, 1, 1, 1, 1},
-                        {1, 0, 0, 0, 0, 0, 0, 0, 1},
-                        {1, 0, 1, 1, 1, 0, 1, 0, 1},
-                        {1, 0, 1, 0, 1, 1, 1, 0, 1},
-                        {1, 0, 0, 0, 1, 1, 1, 0, 1},
-                        {1, 0, 1, 1, 1, 0, 0, 0, 1},
-                        {1, 0, 1, 1, 0, 0, 1, 0, 1},
-                        {1, 1, 1, 1, 1, 1, 1, 1, 1}
-                };
-                squareList = CrazyFactory.runWaveAlgorithm(mapArr, beginingSqr, endingSqr, false); //Получаем последовательный список с координатами клеток кратчайшего пути
-                JOptionPane.showMessageDialog(null,"Маршрут построен.");
-//                CrazyFactory.runWarMachine(botModel, squareList, 2, endingSqr); // Запускаем робота в путь
+                Square beginSquare = new Square(7, 1);
+                Square endSquare = new Square(7, 4);
+                CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
+                ArrayList<Square> squareList = null;
+                ArrayList<Point> track = new ArrayList<>(1);
+                try {
+                    squareList = crazyFactory.runWaveAlgorithm(false); //Получаем последовательный список с координатами клеток кратчайшего пути
+                    if(squareList != null){
+                        if(squareList.size() > 0){
+                            JOptionPane.showMessageDialog(null,"Маршрут построен.");
+                            //преобразуем номера клеток в координаты на реальном кадре и отображаем трэк
+                            track = crazyFactory.map2ImgCoordinates(grid, squareList);
+                            grid.showTrackPoints(true,track);
 
-
-
-
-            }
+                            //TODO
+                            //GUDERIAN MODE
+                            //botsManager.runPanzerCamfWagen(0,track);
+                        }
+                    }
+                }catch (Exception ex){
+                    JOptionPane.showMessageDialog(null,
+                            "Some shit hapend. Algoritm doesn't work! - " + ex.getMessage());
+                }
+                }
         });
         upSpeed.addActionListener(new ActionListener() {
             @Override
@@ -264,7 +206,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 speed++;
                 if(speed  > botsManager.getGlobalSpeedLimit())
                     speed = botsManager.getGlobalSpeedLimit();
-                botsManager.setGlobalSpeedLimit((byte) speed);
+                botsManager.getBot(0).setSpeedLimit((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
@@ -275,22 +217,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 speed--;
                 if (speed <= 0)
                     speed = 0;
-                botsManager.setGlobalSpeedLimit((byte) speed);
+                botsManager.getBot(0).setSpeedLimit((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
-            }
-        });
-        mode0RB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-               // car.setMode((byte)0);
-                goToPanel.hide();
-            }
-        });
-        mode1RB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //car.setMode((byte)1);
-                goToPanel.show();
             }
         });
 
@@ -298,18 +226,34 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             @Override
             public void mouseClicked(MouseEvent e) {
                 //JOptionPane.showMessageDialog(null,"hehehehe" + e.getX() + " " + e.getY());
+                grid.showTrackPoints(false,null);
                 int x = e.getX();
                 int y = e.getY();
+
                 if(isGettingFieldCoordinates){
                     if(luc_rdc_clicks){
                         grid.setUpLeftCorner(new Point(x,y));
                     }else {
                         grid.setDownRightCorner(new Point(x,y));
                         isGettingFieldCoordinates = false;
+
                         calibrCoordinates.setBackground(null);
                         grid.saveSettingsToFile("gridSettings.txt");
                     }
                     luc_rdc_clicks = !luc_rdc_clicks;
+                }
+                if(mode1RB.isSelected()){
+                    //JOptionPane.showMessageDialog(null,"X:" + x + "   Y:" + y);
+                    int dialogResult = JOptionPane.showConfirmDialog (null, "Вы действительно хотите открыть второй фронт?","Achtung",JOptionPane.YES_NO_OPTION);
+                    if(dialogResult == JOptionPane.YES_OPTION){
+                        if(x > coordinator.getFRAME_WIDTH()){
+                            x = coordinator.getFRAME_WIDTH();
+                        }
+                        if(y > coordinator.getFRAME_HEIGHT()){
+                            y = coordinator.getFRAME_HEIGHT();
+                        }
+                        botsManager.runPanzerCamfWagen(0,new Point(x,y));
+                    }
                 }
             }
 
@@ -326,8 +270,6 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             public void mouseExited(MouseEvent e) {}
         });
 
-        panel.add(IP);
-        panel.add(connect);
         panel.add(modePanel);
         panel.add(upSpeed);
         panel.add(downSpeed);
@@ -341,7 +283,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         add(goToPanel);
         this.getContentPane().add(panel);
         //setBounds(30,30,300,300);
-        setPreferredSize(new Dimension(1000,550));//(930,510)
+        setPreferredSize(new Dimension(880,520));//(930,510)
         setResizable(false);
         setFocusable(true);
         requestFocusInWindow();
@@ -355,29 +297,28 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     KeyEventDispatcher keyEventDispatcher = new KeyEventDispatcher() {
         @Override
         public boolean dispatchKeyEvent(final KeyEvent e) {
-//            if (e.getID() == KeyEvent.KEY_PRESSED) {//нажатие
-//                if(e.getKeyCode() == 38)
-//                    car.goForward();
-//                if(e.getKeyCode() == 40)
-//                    car.goBack();
-//                if(e.getKeyCode() == 37)
-//                    car.turnLeft();
-//                if (e.getKeyCode() == 39)
-//                    car.turnRight();
-//                if(e.getKeyCode() == KeyEvent.VK_ADD)
-//                    upSpeed.doClick();
-//                if(e.getKeyCode() == KeyEvent.VK_SUBTRACT)
-//                    downSpeed.doClick();
-////                if(e.getKeyCode() == KeyEvent.VK_W)
-////                    CrazyFactory.EnterPresed = true;
-//
-//            }
-//            if(e.getID() == KeyEvent.KEY_RELEASED){//отпускане
-//                if (e.getKeyCode() == 38 | e.getKeyCode() == 40)
-//                    car.stop();
-//                if(e.getKeyCode() == 37 | e.getKeyCode() == 39)
-//                    car.goStraight();
-//            }
+
+            if (e.getID() == KeyEvent.KEY_PRESSED) {//нажатие
+                if(e.getKeyCode() == 38)
+                    botsManager.getBot(0).goForward();
+                if(e.getKeyCode() == 40)
+                    botsManager.getBot(0).goBack();
+                if(e.getKeyCode() == 37)
+                    botsManager.getBot(0).turnLeft();
+                if (e.getKeyCode() == 39)
+                    botsManager.getBot(0).turnRight();
+                if(e.getKeyCode() == KeyEvent.VK_ADD)
+                    upSpeed.doClick();
+                if(e.getKeyCode() == KeyEvent.VK_SUBTRACT)
+                    downSpeed.doClick();
+
+            }
+            if(e.getID() == KeyEvent.KEY_RELEASED){//отпускане
+                if (e.getKeyCode() == 38 | e.getKeyCode() == 40)
+                    botsManager.getBot(0).stop();
+                if(e.getKeyCode() == 37 | e.getKeyCode() == 39)
+                    botsManager.getBot(0).goStraight();
+            }
             return false;
         }
     };
@@ -386,11 +327,11 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         @Override
         public void windowClosing(WindowEvent e) {
             try {
-                    botsManager.closeConnection(-1);
-                    coordinator.interrupt();
-                    botsManager = null;
-                    coordinator = null;
-                    System.exit(0);
+                botsManager.closeConnection(-1);
+                coordinator.interrupt();
+                botsManager = null;
+                coordinator = null;
+                System.exit(0);
             }catch (NullPointerException ex){}
         }
     };
@@ -446,8 +387,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     }
 
     public void update(){
-       updateImage();
-       setObjCoordinates();
+        updateImage();
+        setObjCoordinates();
     }
 }
 

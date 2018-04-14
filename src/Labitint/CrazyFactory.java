@@ -1,17 +1,37 @@
 package Labitint;
 import Bot.BotModel;
+import Form.Grid;
+import org.opencv.core.Point;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class CrazyFactory {
-    public static boolean EnterPresed;
-    //int[][] mapArr - массив MxN, содержащий карту лабиринта, представленную в 0-ях (проход) и 1-ах (стена)
-    //Square beginingSqr - клетка, содержащая x и y начальной точки
-    //Square endingSqr - клетка, содержащая x и y точки выхода из лабиринта
-    //boolean diagonalIsAllowed - признак разрешения (true) или запрета (fslse) на поиск пути по диагонали
-    public static Square[] runWaveAlgorithm(int[][] mapArr, Square beginingSqr, Square endingSqr, boolean diagonalIsAllowed) {
+    public boolean diagonalIsAllowed = false;// - признак разрешения (true) или запрета (fslse) на поиск пути по диагонали
+    public Square beginingSqr;//Квдарат с координатами входа  в Лабиринт
+    public Square endingSqr; // Квадрат с координатами выхода из Лабиринта
+    int[][] mapArr = {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 1, 0, 1, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 0, 1},
+            {1, 0, 1, 0, 1, 1, 1, 0, 1},
+            {1, 0, 0, 0, 1, 1, 1, 0, 1},
+            {1, 0, 1, 1, 1, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 0, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1}
+    };//массив MxN, содержащий карту лабиринта, представленную в 0-ях (проход) и 1-ах (стена)
+
+
+    public CrazyFactory(Square beginSquare, Square endSquare){
+        beginingSqr = beginSquare;
+        endingSqr = endSquare;
+    }
+
+    public ArrayList<Square> runWaveAlgorithm(boolean isDiagonalAlowed) {
+        diagonalIsAllowed = isDiagonalAlowed;
         Square[] squareList;
         //Расречатываем Дабиринт
 //        for (int i = 0; i < mapArr.length; i++) {
@@ -21,7 +41,6 @@ public class CrazyFactory {
 //            System.out.println();
 //        }
 //        System.out.println();
-
         // Волновой алгоритм
         int d = 2;
         mapArr[beginingSqr.getX()][beginingSqr.getY()] = d; //начальной клетке присваивается значение d
@@ -46,20 +65,19 @@ public class CrazyFactory {
         }
 
 //      Распечатываем карту Лабиринта с путями.
-        for (int i = 0; i < mapArr.length; i++) {
-            for (int j = 0; j < mapArr[i].length; j++) {
-                if (mapArr[i][j] > 9) {
-                    System.out.print(mapArr[i][j] + " ");
-                } else {
-                    System.out.print(mapArr[i][j] + "  ");
-                }
-
-            }
-            System.out.println();
-        }
-        System.out.println();
-
-// Формируем список squareList - последовательный лист клеток кратчайшего пути
+//        for (int i = 0; i < mapArr.length; i++) {
+//            for (int j = 0; j < mapArr[i].length; j++) {
+//                if (mapArr[i][j] > 9) {
+//                    System.out.print(mapArr[i][j] + " ");
+//                } else {
+//                    System.out.print(mapArr[i][j] + "  ");
+//                }
+//
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+// Формируем список wayPointsList - последовательный лист клеток кратчайшего пути
         d = mapArr[endingSqr.getX()][endingSqr.getY()];
         squareList = new Square[d - 1];
         Square curSquare = endingSqr.clone();
@@ -83,19 +101,19 @@ public class CrazyFactory {
         }
 
 //Распечатываем список с клетками
-        for (Square someSquare : squareList) {
-            System.out.println("x : " + someSquare.getX());
-            System.out.println("y : " + someSquare.getY());
-            System.out.println();
-
-        }
+//        for (Square someSquare : squareList) {
+//            System.out.println("x : " + someSquare.getX());
+//            System.out.println("y : " + someSquare.getY());
+//            System.out.println();
+//
+//        }
 
         String fileName = "WaweAlgorithmResult.txt";
         try {
             FileWriter writer = new FileWriter(fileName,false);
             String curStr = " ";
-            for (Square someSquare : squareList) {
-            curStr = "x : " + someSquare.getX() + "     y : " + someSquare.getY() + "\n";
+            for (int i = 0; i < squareList.length;i++){
+            curStr = i + " - x : " + squareList[i].getX() + "     y : " + squareList[i].getY() + "\n";
                 writer.write(curStr);
             }
             writer.flush();
@@ -103,7 +121,33 @@ public class CrazyFactory {
         }catch (IOException ex){
             System.out.println(ex.getMessage());
         }
-        return squareList;
+
+        //приведение в адекватную форму с контеййнером
+        ArrayList<Square> output = new ArrayList<Square>(squareList.length);
+        for (int i = 0; i < squareList.length;i++)
+            output.add(squareList[i]);
+        return output;
+    }
+
+    public ArrayList<Point> map2ImgCoordinates(Grid grid, ArrayList<Square> badMap){
+        ArrayList<Point> goodMap = new ArrayList<>(badMap.size());
+
+        //длина ячейки по оси oX сетки в СК opencv(горизонталь)
+        double squareXopcvSize =grid.getXsquareSize();
+        //аналогично, но по оси оУ (вертикаль)
+        double squareYopcvSize =grid.getYsquareSize();
+
+        for (int i = 0; i < badMap.size();i+=2){
+            int I = ((badMap.get(i).getY() - 1)/2);
+            int J = ((badMap.get(i).getX() - 1)/2);
+            double xPoint  = grid.getUpLeftCorner().x + squareXopcvSize * (double)I + squareXopcvSize / 2;
+            double yPoint  = grid.getUpLeftCorner().y + squareYopcvSize *  (double)J + squareYopcvSize / 2;
+
+            goodMap.add(new Point(xPoint,yPoint));
+        }
+
+
+        return goodMap;
     }
 
     //BotModel myBotModel - виртуальная модель робота
@@ -116,7 +160,6 @@ public class CrazyFactory {
         int difference;//Для вычисления разницы между текущим и требуемым азимутом
         Square nextSqr;
         while (curPoint != squareList.length - 1) {//Пока не добрались до крайней точки
-            CrazyFactory.EnterPresed = false;
             nextPoint = curPoint + 1;
             //Если несколько клеток распологаются по прямой - делаем серию, следуя сразу к последней её клетке. Серия может быть либо по x, либо по y
             if (squareList[nextPoint].getX() == myBotModel.getX()) {    //Пытаемся сделать серию по x
@@ -175,10 +218,7 @@ public class CrazyFactory {
 //                while (Math.abs(myBotModel.getX() - nextSqr.getX()) > err || Math.abs(myBotModel.getY() - nextSqr.getY()) > err) {//Условие - ошибка больше допустимой
 //                    //просто крутим цикл, пока не доедем
 //                }
-                while (!CrazyFactory.EnterPresed){
 
-                }
-                CrazyFactory.EnterPresed = false;
                 myBotModel.stop();
                 curPoint = nextPoint;
                 myBotModel.setX(squareList[curPoint].getX());

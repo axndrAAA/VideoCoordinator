@@ -3,8 +3,8 @@ package Bot;
 import Coordinator.BotOnImage;
 import Coordinator.MedianFilter;
 import Form.Grid;
+import org.opencv.core.Point;
 
-import java.awt.*;
 
 /**
  * Created by Александр on 26.10.2016.
@@ -21,8 +21,7 @@ public class BotModel {//класс-модель платформы
     private int y;
     private int azimut;//угол между осью 0у и осью платформы
 
-    private int xdest;
-    private int ydest;
+    private Point destPoint;
 
     private String IP;
     private  int port;
@@ -87,13 +86,10 @@ public class BotModel {//класс-модель платформы
     }
 
     public byte getMode() {   return mode; }
-    public void setMode(byte mode) {this.mode = mode;}
-
-    public int getXdest() {  return xdest; }
-    public int getYdest() {  return ydest;  }
-
-    public void setXdest(int xdest) {this.xdest = xdest;}
-    public void setYdest(int ydest) {this.ydest = ydest;}
+    private void setMode(byte mode) {
+        if(destPoint != null)
+            this.mode = mode;
+    }
 
     public synchronized  byte getspeedLimit(){
         return speedLimit;
@@ -151,7 +147,8 @@ public class BotModel {//класс-модель платформы
             message = "b1/" + String.valueOf(fsb) + String.valueOf(lfr) + String.valueOf(speed)+ "/e";
         }
         if(mode == 1){
-            message = "b2/" + String.valueOf(x) + "/" + String.valueOf(y) + "/" + String.valueOf(xdest) + "/" + String.valueOf(ydest) + "/e";
+            message = "b2/" + String.valueOf(x) + "/" + String.valueOf(y) + "/"
+                    + String.valueOf(destPoint.x) + "/" + String.valueOf(destPoint.y) + "/e";
         }
         return message;
     }
@@ -174,6 +171,32 @@ public class BotModel {//класс-модель платформы
             }
         }
 
+    }
+
+    public double goToPoint(Point destPoint, double eps){
+        //алгоритм контроля прихода в точку
+
+        this.destPoint = destPoint;
+        double distance = Math.sqrt((this.getX()-destPoint.x)*(this.getY()-destPoint.y));
+        synchronized (this){
+            //переключение в режим следования в точку
+            setMode((byte) 1);
+
+            while (distance > eps){
+                distance = Math.sqrt((this.getX()-destPoint.x)*(this.getY()-destPoint.y));
+                //ожидаем пока доедет.
+
+                //TODO
+                //debug
+                break;
+
+            }
+            setMode((byte) 0);
+            stop();
+        }
+
+        //вернем фактический промах
+        return distance;
     }
 
 

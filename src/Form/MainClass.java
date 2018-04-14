@@ -66,3 +66,60 @@ public class MainClass {
 
 
 }
+
+
+// Пример использования многострочных полей JTextArea
+//
+//import javax.swing.*;
+//import java.awt.Font;
+//import java.io.ByteArrayInputStream;
+//import java.io.InputStream;
+//
+//public class MainClass extends JFrame
+//{
+//    JTextArea area1;
+//    JTextArea area2;
+//    public MainClass()
+//    {
+//        super("Пример JTextArea");
+//        setDefaultCloseOperation(EXIT_ON_CLOSE);
+//
+//        // Cоздание многострочных полей
+//         area1 = new JTextArea("Многострочное поле", 8, 10);
+//        // Шрифт и табуляция
+//        area1.setFont(new Font("Dialog", Font.PLAIN, 14));
+//        area1.setTabSize(10);
+//        area1.setEditable(false);
+//
+//         area2 = new JTextArea(15, 10);
+//        area2.setText("Второе многострочное поле");
+//        // Параметры переноса слов
+//        area2.setLineWrap(true);
+//        area2.setWrapStyleWord(true);
+//
+//        // Добавим поля в окно
+//        JPanel contents = new JPanel();
+//        contents.add(new JScrollPane(area1));
+//        contents.add(new JScrollPane(area2));
+//        setContentPane(contents);
+//
+//        // Выводим окно на экран
+//        setSize(400, 300);
+//        setVisible(true);
+//    }
+//    public static void main(String[] args) {
+//        MainClass obj = new MainClass();
+//        String bufer = "buf";
+//        InputStream is = new ByteArrayInputStream(bufer.getBytes());
+//        System.setIn(is);
+//
+//        while (true){
+//            System.out.println("StdOut");
+//            obj.area1.append(bufer);
+//            try {
+//                Thread.currentThread().sleep(500);
+//
+//            }catch (InterruptedException ex){}
+//        }
+//    }
+//}

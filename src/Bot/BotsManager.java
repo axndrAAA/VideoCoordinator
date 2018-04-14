@@ -1,7 +1,9 @@
 package Bot;
 
 import Coordinator.BotOnImage;
+import org.opencv.core.Point;
 
+import java.awt.*;
 import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ public class BotsManager {
     //класс содержит список платформ,и способен осуществлять управление каждой из них
 
     private ArrayList<BotTransmitter> bots;
+    private ArrayList<BotDriver> botDrivers;
 
     private byte globalSpeedLimit;
 
@@ -17,6 +20,7 @@ public class BotsManager {
     public BotsManager(int numberOfBots){
 
         bots = new ArrayList<BotTransmitter>(numberOfBots);
+        botDrivers = new ArrayList<>(numberOfBots);
         int ref_port = 779;
         int tryCount = 0;
         for(int i = 0; i < numberOfBots; i++){
@@ -46,6 +50,8 @@ public class BotsManager {
                 i--;
             }
         }
+        globalSpeedLimit = getBot(0).getspeedLimit();
+
 
     }
 
@@ -142,5 +148,15 @@ public class BotsManager {
         catch (IOException ex){System.out.println(ex.getMessage());}
 
         return count - 1;
+    }
+
+    public void runPanzerCamfWagen(int panzerCamfWagenNumer, ArrayList<Point> destList){
+        botDrivers.set(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),destList));
+        botDrivers.get(panzerCamfWagenNumer).run();
+    }
+
+    public void runPanzerCamfWagen(int panzerCamfWagenNumer, Point dest){
+        botDrivers.add(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),dest));
+        botDrivers.get(panzerCamfWagenNumer).run();
     }
 }

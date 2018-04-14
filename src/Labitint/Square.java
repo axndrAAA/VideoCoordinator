@@ -9,6 +9,7 @@ public class Square {
         this.x = x;
     }
 
+    @Override
     public Square clone() {
         return new Square(this.x, this.y);
     }
