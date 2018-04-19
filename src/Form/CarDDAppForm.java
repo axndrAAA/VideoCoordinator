@@ -82,7 +82,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(0,botsManager);
+            coordinator = new VideoCoordinator(1,botsManager);
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());

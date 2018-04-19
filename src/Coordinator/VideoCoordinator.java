@@ -13,9 +13,11 @@ import org.opencv.videoio.VideoCapture;
 
 import org.opencv.videoio.Videoio;
 
+import javax.swing.plaf.synth.Region;
 import java.io.*;
 import java.rmi.AccessException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class VideoCoordinator extends Thread {
 
@@ -78,8 +80,6 @@ public class VideoCoordinator extends Thread {
     public int getFRAME_WIDTH() {return FRAME_WIDTH;}
     public int getFRAME_HEIGHT() {return FRAME_HEIGHT;}
 
-
-
     public void setCalibrationMode(boolean calibrationMode) {
         this.calibrationMode = calibrationMode;
     }
@@ -126,7 +126,7 @@ public class VideoCoordinator extends Thread {
             if(calibrationWindow != null){
                 return;
             }else{
-                calibrationWindow = new CalibrationWindow(botsManager,H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX);
+                calibrationWindow = new CalibrationWindow(this,botsManager,H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX);
                 calibrationWindow.setVisible(true);
             }
         }else {
@@ -139,6 +139,89 @@ public class VideoCoordinator extends Thread {
             }
         }
 
+
+    }
+
+    public ArrayList<Integer> getAutoParameters(int delta){
+
+        Rect ROI = new Rect((int)grid.getUpLeftCorner().x + 1,(int)grid.getUpLeftCorner().y + 1,
+                grid.getXsquareSize(),grid.getYsquareSize());
+        Mat calibrationField = cameraFeed.submat(ROI);
+
+        Scalar hsvMin = new Scalar(0,0,0);
+        Scalar hsvMax = new Scalar(0,0,0);
+        ArrayList<Integer> ret = new ArrayList<Integer>(6);
+        autoTune(calibrationField,delta,hsvMin,hsvMax);
+
+        ret.add((int)hsvMin.val[0]);
+        ret.add((int)hsvMax.val[0]);
+
+        ret.add((int)hsvMin.val[1]);
+        ret.add((int)hsvMax.val[1]);
+
+        ret.add((int)hsvMin.val[2]);
+        ret.add((int)hsvMax.val[2]);
+
+        return  ret;
+
+    }
+
+    private static Scalar getCheckedRange(int val,int delta,int min, int max){
+        Scalar ret = new Scalar(val - delta,val + delta,0);//min , max , notUsed
+        if(ret.val[0] < min ){
+            ret.val[0] = min;
+        }
+        if(ret.val[1] > max){
+            ret.val[1] = max;
+        }
+        return ret;
+    }
+
+    private void autoTune(Mat img,int delta,Scalar outHSVmin,Scalar outHSVmax){
+
+        Mat hsvImage = new Mat();
+        Imgproc.cvtColor(cameraFeed,hsvImage,Imgproc.COLOR_BGR2HSV);
+
+        ArrayList<Integer> Hhist = new ArrayList<>(Collections.nCopies(180,0));
+        ArrayList<Integer> Shist = new ArrayList<>(Collections.nCopies(256,0));
+        ArrayList<Integer> Vhist = new ArrayList<>(Collections.nCopies(256,0));
+
+        int val = 0;
+        //значения гистограмы
+        for (int i = 0; i < img.rows();i++)
+            for(int j = 0;j<img.cols();j++){
+            val = (int)hsvImage.get(i,j)[0];
+            Hhist.set(val,Hhist.get(val) + 1);
+
+            val = (int)hsvImage.get(i,j)[1];
+            Shist.set(val,Shist.get(val) + 1);
+
+            val = (int)hsvImage.get(i,j)[2];
+            Vhist.set(val,Vhist.get(val) + 1);
+            }
+
+        //outHSVmin = new Scalar(0,0,0);
+        //outHSVmax = new Scalar(179,256,256);
+
+        val = Collections.max(Hhist);//Hue
+        int index = Hhist.indexOf(val);//Hue value index, that appears most often
+        Scalar rng = getCheckedRange(index,delta,0,179);// H range
+        outHSVmin.val[0] = rng.val[0];
+        outHSVmax.val[0] = rng.val[1];
+
+        val = Collections.max(Shist);//Saturation
+        index = Shist.indexOf(val);//Saturation value index, that appears most often
+        rng = getCheckedRange(index,delta,0,255);// S range
+        outHSVmin.val[1] = rng.val[0];
+        outHSVmax.val[1] = rng.val[1];
+
+        val = Collections.max(Vhist);//Value
+        index = Vhist.indexOf(val);//Saturation value index, that appears most often
+        rng = getCheckedRange(index,delta,0,255);// V range
+        outHSVmin.val[2] = rng.val[0];
+        outHSVmax.val[2] = rng.val[1];
+
+        hsvImage = null;
 
     }
 
@@ -283,6 +366,9 @@ public class VideoCoordinator extends Thread {
         }
         Mat threshold = new Mat();
         Mat HSV = new Mat();
+        //this.capture.read(cameraFeed);
+        //autoTune(cameraFeed,10);
+
 
         while (!this.isInterrupted()){
 

@@ -2,6 +2,7 @@ package Coordinator;
 
 import Bot.BotTransmitter;
 import Bot.BotsManager;
+import Form.CarDDAppForm;
 import org.opencv.core.Scalar;
 import sun.plugin2.message.Message;
 
@@ -21,13 +22,14 @@ public class CalibrationWindow extends JFrame
 
 
 
-    //private boolean isSetupOk = false;
+    VideoCoordinator videoCoordinator;
     private boolean isSetupOkAndFinished = false;
 
     private BotsManager botsManager;
 
-    public CalibrationWindow(BotsManager btmng,int Hmin,int Hmax,int Smin,int Smax,int Vmin, int Vmax)
+    public CalibrationWindow(VideoCoordinator vidCoord, BotsManager btmng,int Hmin,int Hmax,int Smin,int Smax,int Vmin, int Vmax)
     {
+        videoCoordinator = vidCoord;
         botsManager = btmng;
         setTitle("Settings");
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -44,17 +46,17 @@ public class CalibrationWindow extends JFrame
         param.add(5,Vmax);
         addSlider(0,"H_MIN",0,179,1,sliderPanel);//like in opncv docs
         addSlider(1,"H_MAX",0,179,1,sliderPanel);//like in opncv docs
-        addSlider(2,"S_MIN",0,256,1,sliderPanel);
-        addSlider(3,"S_MAX",0,256,1,sliderPanel);
-        addSlider(4,"V_MIN",0,256,1,sliderPanel);
-        addSlider(5,"V_MAX",0,256,1,sliderPanel);
+        addSlider(2,"S_MIN",0,255,1,sliderPanel);
+        addSlider(3,"S_MAX",0,255,1,sliderPanel);
+        addSlider(4,"V_MIN",0,255,1,sliderPanel);
+        addSlider(5,"V_MAX",0,255,1,sliderPanel);
         addButtons(sliderPanel);
         add(sliderPanel, BorderLayout.CENTER);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.addWindowListener(exitListener);
 
         if(botsManager.getBotsList().get(0).getBotModel().getBotOnImage() != null)
-            setUpSettings(botsManager.getBotsList().get(0).getBotModel().getBotOnImage(),sliderPanel);
+            setUpSettings(botsManager.getBotsList().get(0).getBotModel().getBotOnImage().getParametersList(),sliderPanel);
     }
 
 
@@ -113,7 +115,7 @@ public class CalibrationWindow extends JFrame
             public void actionPerformed(ActionEvent e) {
                 int i = editCurBotSettings.getSelectedIndex();
                 if(botsManager.getBotsList().get(i).getBotModel() != null)
-                    setUpSettings(botsManager.getBotsList().get(i).getBotModel().getBotOnImage(),sliderPanel);
+                    setUpSettings(botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getParametersList(),sliderPanel);
             }
         });
         buttonPanel.add(editCurBotSettings);
@@ -137,15 +139,42 @@ public class CalibrationWindow extends JFrame
                 isSetupOkAndFinished = true;
             }
         });
+        //buttonPanel.add(okButton);
+
+        JTextField autoTuneDelta = new JTextField("10",5);
+        autoTuneDelta.setEditable(true);
+        buttonPanel.add(autoTuneDelta);
+
+        JButton autoTuneButton = new JButton("autoTune");
+        autoTuneButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                try {
+                    ArrayList<Integer> autoParams = videoCoordinator.getAutoParameters(Integer.parseInt(autoTuneDelta.getText()));
+                    setUpSettings(autoParams,sliderPanel);
+                }catch (NumberFormatException ex){
+                    JOptionPane.showMessageDialog(null,"Не верное значение радиуса диапозона",
+                            "Ошибка",JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        });
+        buttonPanel.add(autoTuneButton);
         buttonPanel.add(okButton);
+
+
+
+
+        buttonPanel.add(autoTuneButton);
 
         sliderPanel.add(buttonPanel);
 
     }
 
-    private void setUpSettings(BotOnImage boi,JPanel slidersPanel){
+    private void setUpSettings(ArrayList<Integer> params,JPanel slidersPanel){
         Component[] generalPanel = slidersPanel.getComponents();
-        ArrayList<Integer> params = boi.getParametersList();
+        //ArrayList<Integer> params = boi.getParametersList();
         for(int i = 0; i < params.size();i++){
             setSlider((JPanel)generalPanel[i],params.get(i));
         }
