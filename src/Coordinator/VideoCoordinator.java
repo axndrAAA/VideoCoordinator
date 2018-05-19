@@ -36,8 +36,8 @@ public class VideoCoordinator extends Thread {
     private int FRAME_HEIGHT = 480;
 
     //minimum and maximum object area
-    private int MIN_OBJECT_AREA = 20*20;
-    private int MAX_OBJECT_AREA = (int)(FRAME_HEIGHT*FRAME_WIDTH/1.5);
+    private int MIN_OBJECT_AREA = 15*15;
+    private int MAX_OBJECT_AREA = 40*40;//(int)(FRAME_HEIGHT*FRAME_WIDTH/1.5);
     private int MAX_NUM_OBJECTS = 4;
 
     private double cameraHeigh = 200;//cm
@@ -57,7 +57,9 @@ public class VideoCoordinator extends Thread {
 
     private BotsManager botsManager;
 
+
     private Mat cameraFeed;
+    private Mat originalCameraFeed;
     private Imshow threshShow;
 
     private void writeCoordinatesToFile(){
@@ -89,7 +91,7 @@ public class VideoCoordinator extends Thread {
     }
 
     public synchronized Mat getCameraFeed() {
-        return cameraFeed;
+        return originalCameraFeed;
     }
 
     public VideoCoordinator(int cameraNum)throws AccessException{
@@ -108,8 +110,12 @@ public class VideoCoordinator extends Thread {
         //set height and width of capture frame
         this.capture.set(Videoio.CAP_PROP_FRAME_WIDTH,FRAME_WIDTH);
         this.capture.set(Videoio.CAP_PROP_FRAME_HEIGHT,FRAME_HEIGHT);
+//        this.capture.set(Videoio.CAP_PROP_FRAME_WIDTH,grid.getDownRightCorner().x - grid.getUpLeftCorner().x );
+//        this.capture.set(Videoio.CAP_PROP_FRAME_HEIGHT,grid.getDownRightCorner().y - grid.getUpLeftCorner().y);
 
         cameraFeed = new Mat(FRAME_WIDTH,FRAME_HEIGHT,0);
+        originalCameraFeed = new Mat(FRAME_WIDTH,FRAME_HEIGHT,0);
+
         threshShow = new Imshow(thresholdedWIndowName);
     }
 
@@ -355,6 +361,14 @@ public class VideoCoordinator extends Thread {
         }
     }
 
+    void cameraRead(VideoCapture capture){
+        capture.read(originalCameraFeed);
+        Rect roi = new Rect((int)grid.getUpLeftCorner().x,(int)grid.getUpLeftCorner().y,
+                (int)(grid.getDownRightCorner().x - grid.getUpLeftCorner().x),(int)(grid.getDownRightCorner().y - grid.getUpLeftCorner().y));
+        cameraFeed = originalCameraFeed.submat(roi);
+
+    }
+
 
     //tracking process
     @Override
@@ -371,7 +385,8 @@ public class VideoCoordinator extends Thread {
 
         while (!this.isInterrupted()){
 
-            this.capture.read(cameraFeed);
+            //this.capture.read(cameraFeed);
+            cameraRead(this.capture);
             Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
 
             try{

@@ -175,7 +175,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             @Override
             public void actionPerformed(ActionEvent e) {
                 Square beginSquare = new Square(7, 1);
-                Square endSquare = new Square(7, 4);
+                Square endSquare = new Square(7, 3);
                 CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
                 ArrayList<Square> squareList = null;
                 ArrayList<Point> track = new ArrayList<>(1);
@@ -190,6 +190,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
                             //TODO
                             //GUDERIAN MODE
+                            grid.toGrPointCoord(track);
                             //botsManager.runPanzerCamfWagen(0,track);
                         }
                     }
@@ -244,15 +245,21 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 }
                 if(mode1RB.isSelected()){
                     //JOptionPane.showMessageDialog(null,"X:" + x + "   Y:" + y);
-                    int dialogResult = JOptionPane.showConfirmDialog (null, "Вы действительно хотите открыть второй фронт?","Achtung",JOptionPane.YES_NO_OPTION);
+                    int dialogResult = JOptionPane.showConfirmDialog (null, "Проход в точку: (" + x + ":" + y + ").","Achtung",JOptionPane.YES_NO_OPTION);
                     if(dialogResult == JOptionPane.YES_OPTION){
-                        if(x > coordinator.getFRAME_WIDTH()){
-                            x = coordinator.getFRAME_WIDTH();
+                        if(x > grid.getDownRightCorner().x){
+                            x = (int)grid.getDownRightCorner().x;
                         }
-                        if(y > coordinator.getFRAME_HEIGHT()){
-                            y = coordinator.getFRAME_HEIGHT();
+                        if(y > grid.getDownRightCorner().y){
+                            y = (int)grid.getDownRightCorner().x;
                         }
-                        botsManager.runPanzerCamfWagen(0,new Point(x,y));
+
+                        Point destPoint = new Point(x,y);
+                        ArrayList<Point> track = new ArrayList<>(1);
+                        track.add(destPoint);
+                        grid.showTrackPoints(true,track);
+                        botsManager.runPanzerCamfWagen(0,grid.getGridPointCoord(destPoint));
+
                     }
                 }
             }
@@ -376,7 +383,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             if(coordinator.getCameraFeed().rows() == 0){
                 return;
             }
-            Mat cameraFeed = coordinator.getCameraFeed();
+            Mat cameraFeed = coordinator.getCameraFeed().clone();
             grid.getGridedCameraFeed(cameraFeed);
             BufferedImage bfIm = Imshow.toBufferedImage(cameraFeed);
             map.setImage(bfIm);
@@ -384,6 +391,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         }catch (IllegalAccessError ex){
             System.out.println(ex.getMessage());
         }
+        catch (Exception ex){System.out.println(ex.getMessage());}
     }
 
     public void update(){

@@ -151,12 +151,12 @@ public class BotsManager {
     }
 
     public void runPanzerCamfWagen(int panzerCamfWagenNumer, ArrayList<Point> destList){
-        botDrivers.set(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),destList));
-        botDrivers.get(panzerCamfWagenNumer).run();
+        botDrivers.add(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),destList));
+        botDrivers.get(panzerCamfWagenNumer).start();
     }
 
     public void runPanzerCamfWagen(int panzerCamfWagenNumer, Point dest){
         botDrivers.add(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),dest));
-        botDrivers.get(panzerCamfWagenNumer).run();
+        botDrivers.get(panzerCamfWagenNumer).start();
     }
 }

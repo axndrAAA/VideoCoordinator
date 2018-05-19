@@ -154,7 +154,10 @@ public class Grid {
     }
     public void showTrackPoints(boolean stat, ArrayList<Point> goodMap){
         this.isDrawingTrackPoints = stat;
-        this.track = goodMap;
+        if(goodMap != null)
+            this.track = new ArrayList<Point>(goodMap);
+        else
+            this.track = null;
     }
 
     @Override
@@ -171,5 +174,21 @@ public class Grid {
 
     public int getYsquareSize(){
         return ((int)(this.getDownRightCorner().y - this.getUpLeftCorner().y)/this.getRowsNumber());
+    }
+
+    public Point getGridPointCoord(Point cameraFeedPoint){
+
+        Point ret = new Point(0,0);
+        ret.x = cameraFeedPoint.x - getUpLeftCorner().x;
+        ret.y = cameraFeedPoint.y - getUpLeftCorner().y;
+        return ret;
+    }
+
+    public void toGrPointCoord(ArrayList<Point> arr){
+        Point ret = new Point(0,0);
+        for (int i = 0; i < arr.size();i++){
+             ret = arr.get(i);
+             arr.set(i,getGridPointCoord(ret));
+        }
     }
 }

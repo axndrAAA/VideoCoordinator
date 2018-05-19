@@ -1,5 +1,6 @@
 package Bot;
 
+import Form.CarDDAppForm;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -8,16 +9,16 @@ public class BotDriver extends Thread {
 
     private BotModel bot;
     private ArrayList<Point> map;
-    private double eps;//область, при достижении котоорой засчитывается достижение ППМ
+    private double eps = 10.0;//область, при достижении котоорой засчитывается достижение ППМ
 
     public BotDriver(BotModel bot, ArrayList<Point> map) {
         this.bot = bot;
         this.map = map;
-        this.eps = 20.0;
     }
 
     public BotDriver(BotModel bot, ArrayList<Point> map, double eps){
         this(bot,map);
+        this.setName("BotDriver");
         this.eps = eps;
     }
 
@@ -25,7 +26,6 @@ public class BotDriver extends Thread {
         this.bot = bot;
         this.map = new ArrayList<Point>(1);
         map.add(destPoint);
-        this.eps = 20.0;
     }
 
     @Override
@@ -34,6 +34,8 @@ public class BotDriver extends Thread {
             for (Point curPoint : map) {
                 bot.goToPoint(curPoint,eps);
             }
+            System.out.println("Маршут пройден.");
+            CarDDAppForm.grid.showTrackPoints(false,null);
             break;
         }
 

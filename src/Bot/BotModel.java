@@ -5,6 +5,8 @@ import Coordinator.MedianFilter;
 import Form.Grid;
 import org.opencv.core.Point;
 
+import static java.lang.Thread.sleep;
+
 
 /**
  * Created by Александр on 26.10.2016.
@@ -179,23 +181,28 @@ public class BotModel {//класс-модель платформы
         //алгоритм контроля прихода в точку
 
         this.destPoint = destPoint;
-        double distance = Math.sqrt((this.getX()-destPoint.x)*(this.getY()-destPoint.y));
-        synchronized (this){
-            //переключение в режим следования в точку
-            setMode((byte) 1);
+        double distance = Math.sqrt(Math.pow((this.getX()-destPoint.x),2)
+                + Math.pow((this.getY()-destPoint.y),2));
 
-            while (distance > eps){
-                distance = Math.sqrt((this.getX()-destPoint.x)*(this.getY()-destPoint.y));
+        //переключение в режим следования в точку
+        setMode((byte) 1);
+
+        while (distance > eps){
+            try {
+                distance = Math.sqrt(Math.pow((this.getX()-destPoint.x),2)
+                        + Math.pow((this.getY()-destPoint.y),2));
+                System.out.print("X, Y: " + x + "  " + y + "   ");
+
+                System.out.println("Point distance: " + (int)distance);
                 //ожидаем пока доедет.
+                Thread.currentThread().sleep(100);
 
-                //TODO
-                //debug
-                break;
-
-            }
-            setMode((byte) 0);
-            stop();
+            }catch (InterruptedException ex){}
         }
+
+        System.out.println("Point reached.");
+        setMode((byte) 0);
+        stop();
 
         //вернем фактический промах
         return distance;
