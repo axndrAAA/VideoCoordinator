@@ -109,11 +109,13 @@ public class BotModel {//класс-модель платформы
     public synchronized int getY() { return y;}
 
     public synchronized void setX(int x) {
-        this.x = xFilter.getFilteredValue(x);
+        //this.x = xFilter.getFilteredValue(x);
+        this.x = x;
         botOnImage.setxPos(this.x);
     }
     public synchronized void setY(int y) {
-        this.y = yFilter.getFilteredValue(y);
+        //this.y = yFilter.getFilteredValue(y);
+        this.y = y;
         botOnImage.setyPos(this.y);
     }
 

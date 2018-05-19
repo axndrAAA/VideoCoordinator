@@ -120,8 +120,8 @@ public class CalibrationWindow extends JFrame
         });
         buttonPanel.add(editCurBotSettings);
 
-        JButton addButton = new JButton("Confirm");
-        addButton.addActionListener(new ActionListener() {
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int curObj = editCurBotSettings.getSelectedIndex();
@@ -130,18 +130,9 @@ public class CalibrationWindow extends JFrame
                                        new Scalar(param.get(1),param.get(3),param.get(5))));
             }
         });
-        buttonPanel.add(addButton);
+        buttonPanel.add(confirmButton);
 
-        JButton okButton = new JButton("Ok");
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isSetupOkAndFinished = true;
-            }
-        });
-        //buttonPanel.add(okButton);
-
-        JTextField autoTuneDelta = new JTextField("10",5);
+        JTextField autoTuneDelta = new JTextField("20",5);
         autoTuneDelta.setEditable(true);
         buttonPanel.add(autoTuneDelta);
 
@@ -161,13 +152,20 @@ public class CalibrationWindow extends JFrame
             }
         });
         buttonPanel.add(autoTuneButton);
+
+        JButton okButton = new JButton("Ok");
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isSetupOkAndFinished = true;
+            }
+        });
         buttonPanel.add(okButton);
 
 
 
 
         buttonPanel.add(autoTuneButton);
-
         sliderPanel.add(buttonPanel);
 
     }
