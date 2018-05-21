@@ -14,11 +14,12 @@ public class BotDriver extends Thread {
     public BotDriver(BotModel bot, ArrayList<Point> map) {
         this.bot = bot;
         this.map = map;
+        this.setName("BotDriver");
+
     }
 
     public BotDriver(BotModel bot, ArrayList<Point> map, double eps){
         this(bot,map);
-        this.setName("BotDriver");
         this.eps = eps;
     }
 
@@ -26,6 +27,8 @@ public class BotDriver extends Thread {
         this.bot = bot;
         this.map = new ArrayList<Point>(1);
         map.add(destPoint);
+        this.setName("BotDriver");
+
     }
 
     @Override

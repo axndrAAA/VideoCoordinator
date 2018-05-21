@@ -187,7 +187,7 @@ public class BotModel {//класс-модель платформы
         //переключение в режим следования в точку
         setMode((byte) 1);
 
-        while (distance > eps){
+        while ((distance > eps)){
             try {
                 distance = Math.sqrt(Math.pow((this.getX()-destPoint.x),2)
                         + Math.pow((this.getY()-destPoint.y),2));
@@ -195,9 +195,16 @@ public class BotModel {//класс-модель платформы
 
                 System.out.println("Point distance: " + (int)distance);
                 //ожидаем пока доедет.
-                Thread.currentThread().sleep(100);
 
-            }catch (InterruptedException ex){}
+                String n = Thread.currentThread().getName();
+                boolean stop = Thread.currentThread().isInterrupted();
+                if(stop){
+                    break;
+                }
+                //используется при отладке поворота на угол
+//                Thread.currentThread().sleep(1000);
+//                break;
+            }catch (Exception ex){}//InterruptedException
         }
 
         System.out.println("Point reached.");

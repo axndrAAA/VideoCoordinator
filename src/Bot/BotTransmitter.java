@@ -33,7 +33,7 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
 
 
 
-    public void restore(){
+    public synchronized void restore(){
        try {
            isConnectionOk = false;
            System.out.println("Соединение сброшено.");
@@ -104,7 +104,9 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
                     outputStream.write(botModel.getMessage().getBytes());
                     outputStream.flush();
 
-                    byte[] line = new byte[10];
+                    //Thread.currentThread().sleep(300);
+
+                    byte[] line = new byte[15];
                     inputStream.read(line);
                     String s = new String(line);
 
@@ -114,7 +116,7 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
                         continue;
                     }
                     botModel.parseStatus(sarr);
-                    //System.out.println(s);
+                    System.out.println(s);
 
                     Thread.currentThread().sleep(requestFrequency);
                 }catch (IOException ex){
@@ -133,4 +135,5 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
     public BotModel getBotModel() {
         return botModel;
     }
+    public synchronized boolean isConnectionOk(){return isConnectionOk;}
 }

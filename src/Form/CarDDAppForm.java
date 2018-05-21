@@ -32,7 +32,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     public JButton upSpeed;
     public JButton downSpeed;
     public JTextField speed;
-    public JLabel isArrived;
+    public JLabel botStatusLabel;
 
     //табличка
     public JPanel coordObjList;
@@ -44,6 +44,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     //goto режим
     public JPanel goToPanel;
     public JButton goToBtn;
+
+    public JButton restartConnection;
 
     private String[] columnNames = {
             "Color",
@@ -96,10 +98,10 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         JPanel panel = new JPanel();
         panel.setLayout(null);
 
-        isArrived = new JLabel("В пути");
-        isArrived.setForeground(Color.RED);
-        isArrived.setOpaque(true);
-        isArrived.setVerticalAlignment(JLabel.TOP);
+        botStatusLabel = new JLabel("Ofline");
+        botStatusLabel.setForeground(Color.RED);
+        botStatusLabel.setOpaque(true);
+        botStatusLabel.setVerticalAlignment(JLabel.TOP);
 
         upSpeed = new JButton(String.valueOf('↑'));
         downSpeed = new JButton(String.valueOf('↓'));
@@ -137,6 +139,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToPanel.add(new JLabel());
         goToPanel.add(goToBtn);
 
+        restartConnection = new JButton("RestartCon");
+
+
         Image im = null;
         try{
             im = ImageIO.read(new File("icon.jpg"));
@@ -148,13 +153,19 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         upSpeed.setBounds(135,5,45,45);
         speed.setBounds(135,55,45,25);
         downSpeed.setBounds(135,85,45,45);
-        isArrived.setBounds(5,100,125,20);
+        botStatusLabel.setBounds(5,100,125,20);
         coordObjList.setBounds(5,135,215,90);
         calibrColors.setBounds(5,230,82,20);
         calibrCoordinates.setBounds(92,230,82,20);
         goToPanel.setBounds(5,255,215,80);
+        restartConnection.setBounds(5,340,82,20);
 
-
+        restartConnection.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                botsManager.getBotTransmitter(0).restore();
+            }
+        });
 
         calibrColors.addActionListener(new ActionListener() {
             @Override
@@ -207,7 +218,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 speed++;
                 if(speed  > botsManager.getGlobalSpeedLimit())
                     speed = botsManager.getGlobalSpeedLimit();
-                botsManager.getBot(0).setSpeedLimit((byte) speed);
+                botsManager.getBot(0).setSpeed((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
@@ -218,7 +229,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 speed--;
                 if (speed <= 0)
                     speed = 0;
-                botsManager.getBot(0).setSpeedLimit((byte) speed);
+                botsManager.getBot(0).setSpeed((byte) speed);
                 CarDDAppForm.this.speed.setText(String.valueOf(speed));
             }
         });
@@ -226,8 +237,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         map.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                //JOptionPane.showMessageDialog(null,"hehehehe" + e.getX() + " " + e.getY());
-                grid.showTrackPoints(false,null);
+
                 int x = e.getX();
                 int y = e.getY();
 
@@ -243,9 +253,13 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     }
                     luc_rdc_clicks = !luc_rdc_clicks;
                 }
+                Point destPoint = new Point(x,y);
+
                 if(mode1RB.isSelected()){
+                    botsManager.stopAllDrivers();
+                    grid.showTrackPoints(false,null);
                     //JOptionPane.showMessageDialog(null,"X:" + x + "   Y:" + y);
-                    int dialogResult = JOptionPane.showConfirmDialog (null, "Проход в точку: (" + x + ":" + y + ").","Achtung",JOptionPane.YES_NO_OPTION);
+                    int dialogResult = JOptionPane.showConfirmDialog (null, "Проход в точку: (" + grid.getGridPointCoord(destPoint).x + ":" + grid.getGridPointCoord(destPoint).y + ").","Achtung",JOptionPane.YES_NO_OPTION);
                     if(dialogResult == JOptionPane.YES_OPTION){
                         if(x > grid.getDownRightCorner().x){
                             x = (int)grid.getDownRightCorner().x;
@@ -254,7 +268,6 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                             y = (int)grid.getDownRightCorner().x;
                         }
 
-                        Point destPoint = new Point(x,y);
                         ArrayList<Point> track = new ArrayList<>(1);
                         track.add(destPoint);
                         grid.showTrackPoints(true,track);
@@ -282,12 +295,13 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         panel.add(downSpeed);
         panel.add(speed);
         panel.add(map);
-        panel.add(isArrived);
+        panel.add(botStatusLabel);
 
         panel.add(coordObjList);
         panel.add(calibrColors);
         panel.add(calibrCoordinates);
         add(goToPanel);
+        add(restartConnection);
         this.getContentPane().add(panel);
         //setBounds(30,30,300,300);
         setPreferredSize(new Dimension(880,520));//(930,510)
@@ -351,13 +365,13 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             ip_l.setForeground(Color.RED);
     }
     //функция смены статуса
-    public static void setStatus(CarDDAppForm form, boolean isarrived){
-        if(isarrived){
-            form.isArrived.setForeground(Color.GREEN);
-            form.isArrived.setText("Прибыл на точку");
+    public static void setStatus(CarDDAppForm form, BotsManager botsManager){
+        if(botsManager.getBotTransmitter(0).isConnectionOk()){
+            form.botStatusLabel.setForeground(Color.GREEN);
+            form.botStatusLabel.setText(botsManager.getBot(0).getName() + " online.");
         }else{
-            form.isArrived.setForeground(Color.RED);
-            form.isArrived.setText("В пути");
+            form.botStatusLabel.setForeground(Color.RED);
+            form.botStatusLabel.setText(botsManager.getBot(0).getName() + " ofline");
         }
 
     }
@@ -397,6 +411,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     public void update(){
         updateImage();
         setObjCoordinates();
+        setStatus(this,this.botsManager);
     }
 }
 

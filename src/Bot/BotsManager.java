@@ -21,7 +21,7 @@ public class BotsManager {
 
         bots = new ArrayList<BotTransmitter>(numberOfBots);
         botDrivers = new ArrayList<>(numberOfBots);
-        int ref_port = 779;
+        int ref_port = 777;
         int tryCount = 0;
         for(int i = 0; i < numberOfBots; i++){
             BotModel model;
@@ -117,6 +117,9 @@ public class BotsManager {
     public BotModel getBot(int i)throws IndexOutOfBoundsException{
         return bots.get(i).getBotModel();
     }
+    public BotTransmitter getBotTransmitter(int i){
+        return bots.get(i);
+    }
 
     public void saveTrackingSettingsToFile(){
         String fileName = "settings.txt";
@@ -159,4 +162,11 @@ public class BotsManager {
         botDrivers.add(panzerCamfWagenNumer,new BotDriver(getBot(panzerCamfWagenNumer),dest));
         botDrivers.get(panzerCamfWagenNumer).start();
     }
+
+    public void stopAllDrivers(){
+        for (int i = 0; i < botDrivers.size();i++){
+            botDrivers.get(i).interrupt();
+        }
+    }
+
 }
