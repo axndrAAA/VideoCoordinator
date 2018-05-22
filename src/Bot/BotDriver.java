@@ -9,7 +9,7 @@ public class BotDriver extends Thread {
 
     private BotModel bot;
     private ArrayList<Point> map;
-    private double eps = 10.0;//область, при достижении котоорой засчитывается достижение ППМ
+    private double eps = 30.0;//область, при достижении котоорой засчитывается достижение ППМ
 
     public BotDriver(BotModel bot, ArrayList<Point> map) {
         this.bot = bot;

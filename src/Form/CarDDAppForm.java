@@ -202,7 +202,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                             //TODO
                             //GUDERIAN MODE
                             grid.toGrPointCoord(track);
-                            //botsManager.runPanzerCamfWagen(0,track);
+                            botsManager.runPanzerCamfWagen(0,track);
                         }
                     }
                 }catch (Exception ex){
