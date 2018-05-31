@@ -84,7 +84,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
         // tracker running
         try{
-            coordinator = new VideoCoordinator(1,botsManager);
+            coordinator = new VideoCoordinator(0,botsManager);
             coordinator.start();
         }catch (AccessException ex){
             System.out.println(ex.getMessage());
@@ -185,7 +185,19 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Square beginSquare = new Square(7, 1);
+//                botsManager.getBot(0).setX(100);
+//                botsManager.getBot(0).setY(100);
+
+                //определям в какой клетке в данный момент находится бот номер 0
+                //Square beginSquare = new Square(7, 1);
+                Square beginSquare = CrazyFactory.getWaweAlgCoordinatesFromGridCoord(
+                                                    grid.getSquareBotPlaced(botsManager.getBot(0)));
+                JOptionPane.showMessageDialog(null,
+                        "bot in [" + beginSquare);
+
+                if(beginSquare != null)
+                    return;
+
                 Square endSquare = new Square(7, 3);
                 CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
                 ArrayList<Square> squareList = null;

@@ -150,6 +150,18 @@ public class CrazyFactory {
         return goodMap;
     }
 
+    public static Square getWaweAlgCoordinatesFromGridCoord(Square gridCoord){
+
+        int Y = gridCoord.getX();//помним, что в волновом алгоритме, и в openCV приняты разныеСК(названия осей обменены местами )
+        int X = gridCoord.getY();
+        //пересичтаем координаты исходя из того, что в волновом алгоритме
+        //каждая стенка и проход - это тоже клетки.
+        X = X*2 + 1;
+        Y = Y*2 + 1;
+
+        return new Square(X,Y);
+    }
+
     //BotModel myBotModel - виртуальная модель робота
     //int err - допустимая ошибка определения местоположения
     //Square endingSqr - клетка, содержащая x и y точки выхода из лабиринта
@@ -229,5 +241,6 @@ public class CrazyFactory {
 
 
     }
+
 
 }

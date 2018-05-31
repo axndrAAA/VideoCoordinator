@@ -49,4 +49,9 @@ public class Square {
         result = 31 * result + x;
         return result;
     }
+
+    @Override
+    public String toString(){
+        return "[" + getX() + " : " + getY() + "]";
+    }
 }

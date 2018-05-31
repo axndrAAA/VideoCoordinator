@@ -1,6 +1,8 @@
 package Form;
 
+import Bot.BotModel;
 import Coordinator.BotOnImage;
+import Labitint.Square;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -190,5 +192,15 @@ public class Grid {
              ret = arr.get(i);
              arr.set(i,getGridPointCoord(ret));
         }
+    }
+
+    public Square getSquareBotPlaced(BotModel bot){
+        //у бота координаты уже в пикселях с нулем в левом верхнем углу grid
+
+        //определим в какой клетке grid находится бот (считаем с нуля - аки програмистый)
+        int X = bot.getX()/getXsquareSize();
+        int Y = bot.getY()/getYsquareSize();
+
+        return new Square(X,Y);
     }
 }
