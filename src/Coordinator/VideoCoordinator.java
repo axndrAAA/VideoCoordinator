@@ -19,6 +19,8 @@ import java.rmi.AccessException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static org.opencv.core.CvType.CV_8UC1;
+
 public class VideoCoordinator extends Thread {
 
     //initial min and max HSV filter values.
@@ -435,11 +437,6 @@ public class VideoCoordinator extends Thread {
         if(wals == null)
             return null;
 
-
-
-
-
-
         if(!this.capture.isOpened()){
             System.out.println("Camera did not opened");
             return null;
@@ -448,34 +445,26 @@ public class VideoCoordinator extends Thread {
         Mat HSV = new Mat();//матрица для HSV представления
         Mat statisticImg = cameraFeed.clone();//матрица для набора статистики
 
-        //TODO: debug
-        Imshow debugImshow = new Imshow("debug1");
-
-        //наберем статистику из кадров
-        for (int i = 0; i < 50; i++){
+//        //наберем статистику из кадров
+        int numFrames = 5;
+        for (int i = 0; i < numFrames; i++){
             cameraRead(this.capture);
-            //сложение матриц(КОООКК!!!)
-            for (int i1 = 0; i1 < cameraFeed.rows();i1++){
-                for (int j1 = 0; j1 < cameraFeed.cols();j1++){
-                    statisticImg.put(i1,j1,(statisticImg.get(i1,j1)[0]+cameraFeed.get(i1,j1)[0])/50);
-                }
-            }
+            //нормирование выборки матриц(КОООКК!!!)
+            Mat normed = cameraFeed.clone();
+
+            Core.multiply(normed,Mat.ones(cameraFeed.size(),CvType.CV_8UC3 ),normed,1.0/numFrames);
+            Core.add(normed,statisticImg,statisticImg);
         }
 
         //бинаризуем по заданным параметрам
         try{
-
-                    Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
-                    Core.inRange(HSV,wals.getHSVmin(),wals.getHSVmax(),threshold);
-                    morphOps(threshold);
-                    //Debug
-                    debugImshow.showImage(threshold);
+            Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
+            Core.inRange(HSV,wals.getHSVmin(),wals.getHSVmax(),threshold);
+            morphOps(threshold);
 
         }catch (NullPointerException ex){
              System.out.println(ex.getMessage());
         }
-
-
         return threshold;
     }
 }

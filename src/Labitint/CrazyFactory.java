@@ -1,6 +1,7 @@
 package Labitint;
 import Bot.BotModel;
 import Form.Grid;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.io.FileWriter;
@@ -28,6 +29,10 @@ public class CrazyFactory {
     public CrazyFactory(Square beginSquare, Square endSquare){
         beginingSqr = beginSquare;
         endingSqr = endSquare;
+    }
+
+    public void setMapArr(int[][] mapArr) {
+        this.mapArr = mapArr;
     }
 
     public ArrayList<Square> runWaveAlgorithm(boolean isDiagonalAlowed) {
@@ -242,5 +247,7 @@ public class CrazyFactory {
 
     }
 
-
+    public static  int[][] getMapFromImage(Mat img){
+        return null;
+    }
 }

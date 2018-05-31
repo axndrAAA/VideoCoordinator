@@ -186,31 +186,56 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                botsManager.getBot(0).setX(100);
-//                botsManager.getBot(0).setY(100);
 
-                //определям в какой клетке в данный момент находится бот номер 0
-                //Square beginSquare = new Square(7, 1);
-                Square beginSquare = CrazyFactory.getWaweAlgCoordinatesFromGridCoord(
-                                                    grid.getSquareBotPlaced(botsManager.getBot(0)));
-                JOptionPane.showMessageDialog(null,
-                        "bot in [" + beginSquare);
-
-                //далее необходмо перестроить видеокоординатор на цвет стенок,
-                // и получить изображение для дальнейшего анализа и построения карты
+                //получаем изображение для дальнейшего анализа и построения карты
 
                 //модель описывающая сттенку на кадре с камеры
                 BotOnImage walsModel = new BotOnImage("WallsTrackingSettings.txt",1);
 
+                //бинаризованное изображение
                 Mat walsImg = coordinator.getWalsImage(walsModel);
-                Imshow imshow = new Imshow("showWalse");
-                imshow.showImage(walsImg);
 
-                if(beginSquare != null)
+                //окно демонстрации биаризованного кадра
+                Imshow imshow = new Imshow("showWals");
+
+                if(walsImg != null){
+                    imshow.showImage(walsImg);
+                }
+
+                int dialogResult = JOptionPane.showConfirmDialog (null,
+                        "Утвердите изображение.","Achtung",JOptionPane.YES_NO_OPTION);
+                int maparr[][] = null;
+                if(dialogResult == JOptionPane.YES_OPTION){
+                    //если изображение утверждено, рспознаем карту
+                    maparr = CrazyFactory.getMapFromImage(walsImg);
+
+                    imshow.Window.hide();
+                    imshow = null;
+
+                }else {
+                    //если изображение не утверждено, то пропускаем ход, и пробуем еще раз
+                    imshow.Window.hide();
+                    imshow = null;
                     return;
+                }
 
+
+                //определям в какой клетке в данный момент находится бот номер 0
+                //Square beginSquare = new Square(7, 1);
+                Square beginSquare = CrazyFactory.getWaweAlgCoordinatesFromGridCoord(
+                        grid.getSquareBotPlaced(botsManager.getBot(0)));
+                JOptionPane.showMessageDialog(null,
+                        "bot in [" + beginSquare);
+
+
+                //точка назначения всегда одна
                 Square endSquare = new Square(7, 3);
+
+                //алгоритм определения маршрута
                 CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
+                crazyFactory.setMapArr(maparr);
+
+                //карта маршрута
                 ArrayList<Square> squareList = null;
                 ArrayList<Point> track = new ArrayList<>(1);
                 try {
