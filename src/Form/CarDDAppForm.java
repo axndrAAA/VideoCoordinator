@@ -13,6 +13,7 @@ import java.rmi.AccessException;
 import java.util.ArrayList;
 
 import Bot.BotsManager;
+import Coordinator.BotOnImage;
 import Labitint.CrazyFactory;
 import Labitint.Square;
 import org.opencv.core.Mat;
@@ -194,6 +195,16 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                                                     grid.getSquareBotPlaced(botsManager.getBot(0)));
                 JOptionPane.showMessageDialog(null,
                         "bot in [" + beginSquare);
+
+                //далее необходмо перестроить видеокоординатор на цвет стенок,
+                // и получить изображение для дальнейшего анализа и построения карты
+
+                //модель описывающая сттенку на кадре с камеры
+                BotOnImage walsModel = new BotOnImage("WallsTrackingSettings.txt",1);
+
+                Mat walsImg = coordinator.getWalsImage(walsModel);
+                Imshow imshow = new Imshow("showWalse");
+                imshow.showImage(walsImg);
 
                 if(beginSquare != null)
                     return;

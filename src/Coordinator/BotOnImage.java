@@ -4,6 +4,7 @@ import Form.Grid;
 import org.opencv.core.Scalar;
 
 import java.awt.*;
+import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -54,6 +55,38 @@ public class BotOnImage {
         this.HSVmin = hsv_min;
         this.HSVmax = hsv_max;
         this.colour = color;
+    }
+
+    public BotOnImage(String fileName, int k){//к - тупо параметр, чтобы отличать два конструктора
+        BufferedReader reader = null;
+        try{
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+            String str;
+            reader.readLine();//вычитывание заголовочной строки
+
+            str = reader.readLine();
+
+            BotOnImage boi =  new BotOnImage(str);
+            this.number = boi.number;
+            this.name = boi.name;
+            this.HSVmin = boi.HSVmin;
+            this.HSVmax = boi.HSVmax;
+            this.colour = boi.colour;
+
+
+
+        }catch (FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }catch (NumberFormatException ex){
+            System.out.println("Файл настроек трекинга поврежден, или не заполнен");
+            System.out.println(ex.getMessage());
+            try {
+                reader.close();
+            }catch (IOException exep){}
+        }catch (IOException ex){
+            System.out.println(ex.getMessage());
+        }catch (NullPointerException ex){}
+
     }
 
     @Override

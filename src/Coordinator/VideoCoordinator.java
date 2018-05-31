@@ -408,8 +408,8 @@ public class VideoCoordinator extends Thread {
                     for(int i = 0; i < botsManager.getBotsList().size();i++){
                         Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
                         Core.inRange(HSV,botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getHSVmin(),
-                                         botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getHSVmax(),
-                                         threshold);
+                                botsManager.getBotsList().get(i).getBotModel().getBotOnImage().getHSVmax(),
+                                threshold);
                         morphOps(threshold);
                         //Debug
                         debugImshow.showImage(threshold);
@@ -419,7 +419,7 @@ public class VideoCoordinator extends Thread {
                         writeCoordinatesToFile();
                 }
             }catch (NullPointerException ex){
-               // System.out.println(ex.getMessage());
+                // System.out.println(ex.getMessage());
             }
 
             try {
@@ -429,8 +429,54 @@ public class VideoCoordinator extends Thread {
                 //System.out.println(e.getMessage());
             }
         }
+    }
+
+    public Mat getWalsImage(BotOnImage wals){
+        if(wals == null)
+            return null;
 
 
+
+
+
+
+        if(!this.capture.isOpened()){
+            System.out.println("Camera did not opened");
+            return null;
+        }
+        Mat threshold = new Mat();//бинаризованная матрица
+        Mat HSV = new Mat();//матрица для HSV представления
+        Mat statisticImg = cameraFeed.clone();//матрица для набора статистики
+
+        //TODO: debug
+        Imshow debugImshow = new Imshow("debug1");
+
+        //наберем статистику из кадров
+        for (int i = 0; i < 50; i++){
+            cameraRead(this.capture);
+            //сложение матриц(КОООКК!!!)
+            for (int i1 = 0; i1 < cameraFeed.rows();i1++){
+                for (int j1 = 0; j1 < cameraFeed.cols();j1++){
+                    statisticImg.put(i1,j1,(statisticImg.get(i1,j1)[0]+cameraFeed.get(i1,j1)[0])/50);
+                }
+            }
+        }
+
+        //бинаризуем по заданным параметрам
+        try{
+
+                    Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
+                    Core.inRange(HSV,wals.getHSVmin(),wals.getHSVmax(),threshold);
+                    morphOps(threshold);
+                    //Debug
+                    debugImshow.showImage(threshold);
+
+        }catch (NullPointerException ex){
+             System.out.println(ex.getMessage());
+        }
+
+
+        return threshold;
     }
 }
 
