@@ -247,7 +247,8 @@ public class CrazyFactory {
 
     }
 
-    public static  int[][] getMapFromImage(Mat img){
-        return null;
+    public static  boolean setMapFromImage(Mat img){
+        //TODO: здесь будет перестрока mapArr в соответствии с переданным img
+        return false;
     }
 }

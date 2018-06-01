@@ -172,4 +172,29 @@ public class BotOnImage {
 
         return ret;
     }
+
+    public void setParameersList(ArrayList<Integer> newParam){
+        HSVmin.val[0] = newParam.get(0);
+        HSVmax.val[0] = newParam.get(1);
+
+        HSVmin.val[1] = newParam.get(2);
+        HSVmax.val[1] = newParam.get(3);
+
+        HSVmin.val[2] = newParam.get(4);
+        HSVmax.val[2] = newParam.get(5);
+    }
+
+    public void saveInFile(String fileName){
+        try {
+            FileWriter writer = new FileWriter(fileName,false);
+            writer.write("// параметры трекига стен(num name Hmin Smin Vmin Hmax Smax Vmax colorR colorG colorB)\n");
+            String curStr = this.toString();
+            writer.write(curStr + "\n");
+
+            writer.flush();
+            writer.close();
+        }catch (IOException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
 }

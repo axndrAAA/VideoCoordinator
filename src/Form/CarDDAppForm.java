@@ -13,7 +13,6 @@ import java.rmi.AccessException;
 import java.util.ArrayList;
 
 import Bot.BotsManager;
-import Coordinator.BotOnImage;
 import Labitint.CrazyFactory;
 import Labitint.Square;
 import org.opencv.core.Mat;
@@ -187,27 +186,27 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //получаем изображение для дальнейшего анализа и построения карты
-
-                //модель описывающая сттенку на кадре с камеры
-                BotOnImage walsModel = new BotOnImage("WallsTrackingSettings.txt",1);
-
-                //бинаризованное изображение
-                Mat walsImg = coordinator.getWalsImage(walsModel);
+                //изображение для дальнейшего анализа и построения карты
+                Mat walsImg = null;
 
                 //окно демонстрации биаризованного кадра
                 Imshow imshow = new Imshow("showWals");
 
-                if(walsImg != null){
+                //особо хитрожопая магия, чтобы запустить процесс настройки фильтрации кадра и получения
+                //бинаризованного кадра со стенами в отдльном потоке
+                if( (walsImg = coordinator.getWalsThresholdedImage()) != null){
                     imshow.showImage(walsImg);
+                }else {
+                    coordinator.tryCalcWalsImage();
+                    return;
                 }
 
                 int dialogResult = JOptionPane.showConfirmDialog (null,
                         "Утвердите изображение.","Achtung",JOptionPane.YES_NO_OPTION);
-                int maparr[][] = null;
                 if(dialogResult == JOptionPane.YES_OPTION){
-                    //если изображение утверждено, рспознаем карту
-                    maparr = CrazyFactory.getMapFromImage(walsImg);
+
+                    //если изображение утверждено, рспознаем и устанавливаем как рабочую новую карту
+                    CrazyFactory.setMapFromImage(walsImg);
 
                     imshow.Window.hide();
                     imshow = null;
@@ -227,13 +226,16 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 JOptionPane.showMessageDialog(null,
                         "bot in [" + beginSquare);
 
+                //TODO:затычка
+                if(beginSquare!=null){
+                    return;
+                }
 
                 //точка назначения всегда одна
                 Square endSquare = new Square(7, 3);
 
                 //алгоритм определения маршрута
                 CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
-                crazyFactory.setMapArr(maparr);
 
                 //карта маршрута
                 ArrayList<Square> squareList = null;

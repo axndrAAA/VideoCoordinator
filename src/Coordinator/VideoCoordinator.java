@@ -4,6 +4,7 @@ import Bot.BotModel;
 import Bot.BotsManager;
 import Form.CarDDAppForm;
 import Form.Grid;
+import Labitint.WalsCalibrationWindow;
 import org.opencv.core.*;
 
 import org.opencv.core.Point;
@@ -13,13 +14,10 @@ import org.opencv.videoio.VideoCapture;
 
 import org.opencv.videoio.Videoio;
 
-import javax.swing.plaf.synth.Region;
 import java.io.*;
 import java.rmi.AccessException;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import static org.opencv.core.CvType.CV_8UC1;
 
 public class VideoCoordinator extends Thread {
 
@@ -51,6 +49,7 @@ public class VideoCoordinator extends Thread {
 
     private boolean calibrationMode;
     private boolean isWritingCoordinatesToFile = true;
+    private boolean isGettingWalsImage = false;
     private String coordinatesOut = "coordinates.txt";
 
 
@@ -62,6 +61,7 @@ public class VideoCoordinator extends Thread {
 
     private Mat cameraFeed;
     private Mat originalCameraFeed;
+    private Mat walsThresholdedImage;
     private Imshow threshShow;
 
     private void writeCoordinatesToFile(){
@@ -117,6 +117,7 @@ public class VideoCoordinator extends Thread {
 
         cameraFeed = new Mat(FRAME_WIDTH,FRAME_HEIGHT,0);
         originalCameraFeed = new Mat(FRAME_WIDTH,FRAME_HEIGHT,0);
+        walsThresholdedImage = null;
 
         threshShow = new Imshow(thresholdedWIndowName);
     }
@@ -241,12 +242,22 @@ public class VideoCoordinator extends Thread {
         Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3));
         Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(8,8));
 
-        Imgproc.erode(thresh,thresh,erodeElement);
-        Imgproc.erode(thresh,thresh,erodeElement);
+        //Imgproc.erode(thresh,thresh,erodeElement);
+        //Imgproc.erode(thresh,thresh,erodeElement);
 
         Imgproc.dilate(thresh,thresh,dilateElement);
         Imgproc.dilate(thresh,thresh,dilateElement);
 
+    }
+    private void walsMorphOps(Mat thresh){
+        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3));
+        Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(8,8));
+
+        //Imgproc.erode(thresh,thresh,erodeElement);
+        //Imgproc.erode(thresh,thresh,erodeElement);
+
+        Imgproc.dilate(thresh,thresh,dilateElement);
+        Imgproc.dilate(thresh,thresh,dilateElement);
     }
 
     public void drawObjectOnScreen(BotOnImage objects, Mat frame){
@@ -382,7 +393,7 @@ public class VideoCoordinator extends Thread {
         }
         Mat threshold = new Mat();
         Mat HSV = new Mat();
-        Imshow debugImshow = new Imshow("debug");
+        //Imshow debugImshow = new Imshow("debug");
 
 
         while (!this.isInterrupted()){
@@ -414,11 +425,16 @@ public class VideoCoordinator extends Thread {
                                 threshold);
                         morphOps(threshold);
                         //Debug
-                        debugImshow.showImage(threshold);
+                        //debugImshow.showImage(threshold);
                         trackFilteredObject(botsManager.getBotsList().get(i).getBotModel(),threshold,HSV,cameraFeed);
                     }
                     if(isWritingCoordinatesToFile)
                         writeCoordinatesToFile();
+                }
+
+                if(isGettingWalsImage){
+                    isGettingWalsImage = false;
+                    walsThresholdedImage = calcWalsImage();
                 }
             }catch (NullPointerException ex){
                 // System.out.println(ex.getMessage());
@@ -433,8 +449,16 @@ public class VideoCoordinator extends Thread {
         }
     }
 
-    public Mat getWalsImage(BotOnImage wals){
-        if(wals == null)
+    private Mat calcWalsImage(){
+
+        //ArrayList<Integer> parameters = (ArrayList<Integer>)walsModel.getParametersList().clone();
+        //модель описывающая сттенку на кадре с камеры
+        BotOnImage walsModel = new BotOnImage("WallsTrackingSettings.txt",1);
+        WalsCalibrationWindow walsCalibrationWindow = new WalsCalibrationWindow(walsModel.getParametersList());
+
+        walsCalibrationWindow.setVisible(true);
+
+        if(walsModel == null)
             return null;
 
         if(!this.capture.isOpened()){
@@ -443,30 +467,79 @@ public class VideoCoordinator extends Thread {
         }
         Mat threshold = new Mat();//бинаризованная матрица
         Mat HSV = new Mat();//матрица для HSV представления
+
+        int numStatisticFrames = 5;
         Mat statisticImg = cameraFeed.clone();//матрица для набора статистики
 
-//        //наберем статистику из кадров
-        int numFrames = 5;
-        for (int i = 0; i < numFrames; i++){
+       Imshow walsImshow = new Imshow("Wals");
+
+        while (!walsCalibrationWindow.isSetupOkAndFinished()){
+
+            walsCalibrationWindow.repaint();
+            //синхронизируем параметры в калибровочном окне и в модели
+            walsModel.setParameersList(walsCalibrationWindow.getParam());
+
+            //читаем новый кадр
+            cameraRead(this.capture);
+
+            //обрабатываем по раннее синхронизированным параметрам
+            Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
+            Core.inRange(HSV,walsModel.getHSVmin(),walsModel.getHSVmax(),threshold);
+            walsMorphOps(threshold);
+
+            //показываем
+            walsImshow.showImage(threshold);
+        }
+
+        //сохраняем в файл введенные настройки
+        walsModel.saveInFile("WallsTrackingSettings.txt");
+
+        //когда настройка завершена
+        //наберем статистику из кадров и фильтруем с заданными настройками
+        for (int i = 0; i < numStatisticFrames; i++){
             cameraRead(this.capture);
             //нормирование выборки матриц(КОООКК!!!)
             Mat normed = cameraFeed.clone();
 
-            Core.multiply(normed,Mat.ones(cameraFeed.size(),CvType.CV_8UC3 ),normed,1.0/numFrames);
+            Core.multiply(normed,Mat.ones(cameraFeed.size(),CvType.CV_8UC3 ),normed,1.0/numStatisticFrames);
             Core.add(normed,statisticImg,statisticImg);
         }
 
         //бинаризуем по заданным параметрам
         try{
             Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
-            Core.inRange(HSV,wals.getHSVmin(),wals.getHSVmax(),threshold);
+            Core.inRange(HSV,walsModel.getHSVmin(),walsModel.getHSVmax(),threshold);
             morphOps(threshold);
 
         }catch (NullPointerException ex){
              System.out.println(ex.getMessage());
         }
+
+        walsCalibrationWindow.setVisible(false);
+        walsCalibrationWindow.dispose();
+        walsCalibrationWindow = null;
+
+        walsImshow.Window.setVisible(false);
+        walsImshow.Window.dispose();
+        walsImshow = null;
+
+
         return threshold;
     }
+
+    public void tryCalcWalsImage(){
+        isGettingWalsImage = true;
+    }
+
+
+    public Mat getWalsThresholdedImage() {
+        if(walsThresholdedImage == null)
+            return null;
+        Mat ret = walsThresholdedImage.clone();
+        walsThresholdedImage = null;
+        return ret;
+    }
+
 }
 
 
