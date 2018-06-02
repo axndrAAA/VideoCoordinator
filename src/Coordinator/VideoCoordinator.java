@@ -125,9 +125,6 @@ public class VideoCoordinator extends Thread {
     public VideoCoordinator(int cameraNum, BotsManager botsManager)throws AccessException{
         this(cameraNum);
         this.botsManager = botsManager;
-        //TODO необходим ввод параметров трекинга для уже имеющихся ботов, а также возможность перестройки...
-        //проверка на предмет заданных параметров
-
     }
 
     public void OperateCalibrationWindow(){
@@ -143,6 +140,7 @@ public class VideoCoordinator extends Thread {
                 calibrationWindow.setVisible(false);
                 calibrationWindow.dispose();
                 calibrationWindow = null;
+                threshShow.Window.hide();
             }else{
                 return;
             }
@@ -242,8 +240,8 @@ public class VideoCoordinator extends Thread {
         Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3));
         Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,new Size(8,8));
 
-        //Imgproc.erode(thresh,thresh,erodeElement);
-        //Imgproc.erode(thresh,thresh,erodeElement);
+        Imgproc.erode(thresh,thresh,erodeElement);
+        Imgproc.erode(thresh,thresh,erodeElement);
 
         Imgproc.dilate(thresh,thresh,dilateElement);
         Imgproc.dilate(thresh,thresh,dilateElement);

@@ -33,7 +33,7 @@ public class CalibrationWindow extends JFrame
         botsManager = btmng;
         setTitle("Settings");
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-
+        setLocation(500,0);
         JPanel sliderPanel = new JPanel();
         sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
 

@@ -25,6 +25,7 @@ public class WalsCalibrationWindow extends JFrame{
         this.param = _param;
         setTitle("Wals settings");
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        setLocation(500,0);
 
         JPanel sliderPanel = new JPanel();
         sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));

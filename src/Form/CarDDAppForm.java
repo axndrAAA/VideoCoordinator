@@ -83,12 +83,18 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         grid = new Grid("gridSettings.txt");
 
         // tracker running
-        try{
-            coordinator = new VideoCoordinator(0,botsManager);
-            coordinator.start();
-        }catch (AccessException ex){
-            System.out.println(ex.getMessage());
+        int cameraNumer = 1;
+        while (true){
+            try{
+                coordinator = new VideoCoordinator(cameraNumer,botsManager);
+                coordinator.start();
+                break;
+            }catch (AccessException ex){
+                System.out.println(ex.getMessage() + "cameraNum = " + cameraNumer);
+                cameraNumer--;
+            }
         }
+        System.out.println("Camera " + cameraNumer + " opened sucsesfully.");
 
     }
     //инициализация формы
@@ -198,6 +204,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     imshow.showImage(walsImg);
                 }else {
                     coordinator.tryCalcWalsImage();
+                    imshow.Window.dispose();
+                    imshow = null;
                     return;
                 }
 
@@ -209,11 +217,13 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     CrazyFactory.setMapFromImage(walsImg);
 
                     imshow.Window.hide();
+                    imshow.Window.dispose();
                     imshow = null;
 
                 }else {
                     //если изображение не утверждено, то пропускаем ход, и пробуем еще раз
                     imshow.Window.hide();
+                    imshow.Window.dispose();
                     imshow = null;
                     return;
                 }
@@ -250,7 +260,6 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                             grid.showTrackPoints(true,track);
 
                             //TODO
-                            //GUDERIAN MODE
                             grid.toGrPointCoord(track);
                             botsManager.runPanzerCamfWagen(0,track);
                         }
