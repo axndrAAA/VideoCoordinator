@@ -1,10 +1,12 @@
 package Form;
 
 
+import Coordinator.Imshow;
 import Coordinator.MedianFilter;
 import Labitint.WalsCalibrationWindow;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
 
 
 import javax.swing.*;
@@ -54,24 +56,10 @@ public class MainClass {
 
     }
 
+
     public static void main (String args[]) throws AccessException{
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.out.println(Core.VERSION);
-
-//        ArrayList<Integer> parameters = new ArrayList<Integer>(6);
-//        parameters.add(1);
-//        parameters.add(1);
-//        parameters.add(1);
-//        parameters.add(1);
-//        parameters.add(1);
-//        parameters.add(1);
-//        WalsCalibrationWindow walsCalibrationWindow = new WalsCalibrationWindow(parameters);
-//        walsCalibrationWindow.setVisible(true);
-//        while (!walsCalibrationWindow.isSetupOkAndFinished()){walsCalibrationWindow.getParam();}
-//
-//        walsCalibrationWindow.setVisible(false);
-//        walsCalibrationWindow.dispose();
-//        walsCalibrationWindow = null;
 
 
         CarDDAppForm form = new CarDDAppForm("Window");

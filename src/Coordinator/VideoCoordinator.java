@@ -503,6 +503,7 @@ public class VideoCoordinator extends Thread {
             Core.add(normed,statisticImg,statisticImg);
         }
 
+
         //бинаризуем по заданным параметрам
         try{
             Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);

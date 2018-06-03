@@ -7,6 +7,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.AccessException;
@@ -15,10 +16,14 @@ import java.util.ArrayList;
 import Bot.BotsManager;
 import Labitint.CrazyFactory;
 import Labitint.Square;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import Coordinator.Imshow;
 import Coordinator.VideoCoordinator;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Created by Александр on 24.10.2016.
@@ -58,6 +63,47 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
             {"", "", ""},
             {"", "", ""},
     };
+    public void a(){
+
+        try {
+            File input = new File("2018-06-01_17-48-20.png");//2018-06-01_17-48-20.png    whiteField.png
+            BufferedImage image = ImageIO.read(input);
+
+            byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+            Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+            mat.put(0, 0, data);
+            Imshow show = new Imshow("aa");
+            show.showImage(mat);
+
+            double[] at = null;
+            for (int i = mat.rows()/2; i < mat.rows(); i++){
+                for(int j = 0; j < mat.cols();j++){
+                    at = mat.get(i,j);
+
+                    if(at[0] != 0.0 || at[1] != 0.0 || at[2] != 0.0)
+                        at = at;
+
+
+                }
+            }
+
+
+
+            Mat mat1 = new Mat(image.getHeight(),image.getWidth(),CvType.CV_8UC1);
+            Imgproc.cvtColor(mat, mat1, Imgproc.COLOR_RGB2GRAY);
+
+            byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int)(mat1.elemSize())];
+            mat1.get(0, 0, data1);
+            BufferedImage image1 = new BufferedImage(mat1.cols(),mat1.rows(), BufferedImage.TYPE_BYTE_GRAY);
+            image1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
+
+            File ouptut = new File("grayscale.png");
+            ImageIO.write(image1, "png", ouptut);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
 
     //public BotModel botModel;//модель платформы
     public BotsManager botsManager;//объект, содержащий список всех передатчиков и привязанных к ним моделей
@@ -73,6 +119,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
     //конструктор
     public CarDDAppForm(String name){
         super(name);
+        //a();
         //создание объектов платформ, передатчиков для них и их запуск
 //        botsManager = new BotsManager(2);
         botsManager = new BotsManager("settings.txt");
@@ -194,10 +241,12 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 
                 //изображение для дальнейшего анализа и построения карты
                 Mat walsImg = null;
+                //walsImg = Imgcodecs.imread("icon1.png",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 
                 //окно демонстрации биаризованного кадра
                 Imshow imshow = new Imshow("showWals");
 
+                //imshow.showImage(walsImg);
                 //особо хитрожопая магия, чтобы запустить процесс настройки фильтрации кадра и получения
                 //бинаризованного кадра со стенами в отдльном потоке
                 if( (walsImg = coordinator.getWalsThresholdedImage()) != null){
@@ -208,13 +257,14 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     imshow = null;
                     return;
                 }
-
+                int[][] newMap = null;
                 int dialogResult = JOptionPane.showConfirmDialog (null,
                         "Утвердите изображение.","Achtung",JOptionPane.YES_NO_OPTION);
+
                 if(dialogResult == JOptionPane.YES_OPTION){
 
                     //если изображение утверждено, рспознаем и устанавливаем как рабочую новую карту
-                    CrazyFactory.setMapFromImage(walsImg);
+                    newMap = CrazyFactory.getMapFromImage(walsImg);
 
                     imshow.Window.hide();
                     imshow.Window.dispose();
@@ -236,16 +286,24 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 JOptionPane.showMessageDialog(null,
                         "bot in [" + beginSquare);
 
-                //TODO:затычка
-                if(beginSquare!=null){
-                    return;
-                }
-
                 //точка назначения всегда одна
                 Square endSquare = new Square(7, 3);
 
                 //алгоритм определения маршрута
                 CrazyFactory crazyFactory = new CrazyFactory(beginSquare,endSquare);
+
+                //если построилась новая карта, то заменяем её
+                if(newMap != null){
+                    crazyFactory.setMapArr(newMap);
+                }else {
+
+                    JOptionPane.showMessageDialog(null,"Something went wrong. Algoritm is invalid.");
+                    return;
+                }
+                //TODO:затычка
+                if(beginSquare!=null){
+                    return;
+                }
 
                 //карта маршрута
                 ArrayList<Square> squareList = null;
@@ -259,7 +317,6 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                             track = crazyFactory.map2ImgCoordinates(grid, squareList);
                             grid.showTrackPoints(true,track);
 
-                            //TODO
                             grid.toGrPointCoord(track);
                             botsManager.runPanzerCamfWagen(0,track);
                         }
