@@ -283,8 +283,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 //Square beginSquare = new Square(7, 1);
                 Square beginSquare = CrazyFactory.getWaweAlgCoordinatesFromGridCoord(
                         grid.getSquareBotPlaced(botsManager.getBot(0)));
-                JOptionPane.showMessageDialog(null,
-                        "bot in [" + beginSquare);
+//                JOptionPane.showMessageDialog(null,
+//                        "bot in [" + beginSquare);
 
                 //точка назначения всегда одна
                 Square endSquare = new Square(7, 3);
@@ -301,9 +301,9 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     return;
                 }
                 //TODO:затычка
-                if(beginSquare!=null){
-                    return;
-                }
+//                if(beginSquare!=null){
+//                    return;
+//                }
 
                 //карта маршрута
                 ArrayList<Square> squareList = null;
@@ -312,7 +312,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     squareList = crazyFactory.runWaveAlgorithm(false); //Получаем последовательный список с координатами клеток кратчайшего пути
                     if(squareList != null){
                         if(squareList.size() > 0){
-                            JOptionPane.showMessageDialog(null,"Маршрут построен.");
+                            JOptionPane.showMessageDialog(null,"Бот в точке: [" + beginSquare +"]. Маршрут построен.");
                             //преобразуем номера клеток в координаты на реальном кадре и отображаем трэк
                             track = crazyFactory.map2ImgCoordinates(grid, squareList);
                             grid.showTrackPoints(true,track);
