@@ -10,7 +10,7 @@ import java.net.Socket;
  */
 public class BotTransmitter extends Thread{//класс - передатчик. Принимает и передает сообщения с платформы и на неё
     private BotModel botModel;//модель платформы
-    public int requestFrequency = 100;;//задржка необходимая для принятия всей строки с платформы
+    public int requestFrequency = 5;;//задржка необходимая корректной работы всех нитей [мсек]
 
     private ServerSocket serverSocket;
     private Socket socket;
@@ -79,57 +79,59 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
     @Override
     public void run(){
         while(!Thread.currentThread().isInterrupted()){
-            if (!isConnectionOk){
-                try {
-                    System.out.println("Соединеие перезапущено " + getBotModel().getIP() + ":" + getBotModel().getPort());
-                    socket = serverSocket.accept();
-                    botModel.setIP(socket.getInetAddress().getHostName().toString());
-                    inputStream = socket.getInputStream();
-                    outputStream = socket.getOutputStream();
-                    isConnectionOk = true;
+            try {
+                if (isConnectionOk){
+                    if(inputStream.available() >= 10){
+                        //читаем запрос
+                        byte[] line = new byte[10];
+                        inputStream.read(line);
 
-                }catch (IOException ex){
-                    try {
-                        Thread.sleep(3000);
-                    }catch (InterruptedException inter_ex){}
-                }catch (NullPointerException ex){
-                    return;
-                }
-            }else {
-                try {
+                        //пробуем парсить
+                        String s = new String(line);
+                        String[] sarr = s.split("/");
+                        if(sarr.length < 3){
+                            //restore();
+                            continue;
+                        }
+                        botModel.parseStatus(sarr);
 
-                    //System.out.println(botModel.getMessage());
-                    outputStream.write(botModel.getMessage().getBytes());
-                    outputStream.flush();
-
-                    //Thread.currentThread().sleep(300);
-
-                    byte[] line = new byte[15];
-                    inputStream.read(line);
-                    String s = new String(line);
-
-                    String[] sarr = s.split("/");
-                    if(sarr.length < 3){
-                        restore();
-                        continue;
+                        //овечаем
+                        outputStream.write(botModel.getMessage().getBytes());
+                        outputStream.flush();
                     }
-                    botModel.parseStatus(sarr);
-                    //System.out.println(s);
-
+                    //вычищаем буфер
+                    clear(inputStream);
                     Thread.currentThread().sleep(requestFrequency);
-                }catch (IOException ex){
-                    restore();
-                }catch (NullPointerException e){
-                    continue;
-                }catch (InterruptedException e){
-                    restore();
+                }else {
+                    try {
+                        System.out.println("Соединеие перезапущено " + getBotModel().getIP() + ":" + getBotModel().getPort());
+                        socket = serverSocket.accept();
+                        botModel.setIP(socket.getInetAddress().getHostName().toString());
+                        inputStream = socket.getInputStream();
+                        outputStream = socket.getOutputStream();
+                        isConnectionOk = true;
+                    }catch (IOException ex){
+                        Thread.sleep(3000);
+                    }
                 }
+            }catch (NullPointerException ex){
+                System.out.println(ex.getMessage());
+                continue;
+            }catch (IOException ex){
+                System.out.println(ex.getMessage());
+            }catch (InterruptedException ex){
+                System.out.println(ex.getMessage() + "stopping thread");
+                break;
             }
         }
         destruct();
-
     }
 
+    private void clear(InputStream stream)throws IOException{
+        while (stream.available() > 0){
+            stream.read();
+        }
+    }
     public BotModel getBotModel() {
         return botModel;
     }
