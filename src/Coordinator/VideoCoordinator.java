@@ -36,7 +36,7 @@ public class VideoCoordinator extends Thread {
     private int FRAME_HEIGHT = 480;
 
     //minimum and maximum object area
-    private int MIN_OBJECT_AREA = 15*15;
+    private int MIN_OBJECT_AREA = 25*25;
     private int MAX_OBJECT_AREA = 40*40;//(int)(FRAME_HEIGHT*FRAME_WIDTH/1.5);
     private int MAX_NUM_OBJECTS = 4;
 
@@ -119,7 +119,7 @@ public class VideoCoordinator extends Thread {
         originalCameraFeed = new Mat(FRAME_WIDTH,FRAME_HEIGHT,0);
         walsThresholdedImage = null;
 
-        threshShow = new Imshow(thresholdedWIndowName);
+        //threshShow = new Imshow(thresholdedWIndowName);
     }
 
     public VideoCoordinator(int cameraNum, BotsManager botsManager)throws AccessException{
@@ -134,13 +134,18 @@ public class VideoCoordinator extends Thread {
             }else{
                 calibrationWindow = new CalibrationWindow(this,botsManager,H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX);
                 calibrationWindow.setVisible(true);
+
+                threshShow = new Imshow(thresholdedWIndowName);
             }
         }else {
             if(calibrationWindow != null){
                 calibrationWindow.setVisible(false);
                 calibrationWindow.dispose();
                 calibrationWindow = null;
-                threshShow.Window.hide();
+
+                threshShow.Window.dispose();
+                threshShow.Window = null;
+                threshShow = null;
             }else{
                 return;
             }
@@ -261,7 +266,7 @@ public class VideoCoordinator extends Thread {
     public void drawObjectOnScreen(BotOnImage objects, Mat frame){
 
             Imgproc.circle(frame,new Point(objects.getxPos(),objects.getyPos()),
-                    10,new Scalar(0,0,255));
+                    10,new Scalar(0,255,0));
             Imgproc.putText(frame,objects.getName(),
                     new Point(objects.getxPos(),objects.getyPos()-30),
                     1,2,objects.getColour());
@@ -391,7 +396,7 @@ public class VideoCoordinator extends Thread {
         }
         Mat threshold = new Mat();
         Mat HSV = new Mat();
-        //Imshow debugImshow = new Imshow("debug");
+        Imshow debugImshow = new Imshow("debug");
 
 
         while (!this.isInterrupted()){
@@ -423,7 +428,7 @@ public class VideoCoordinator extends Thread {
                                 threshold);
                         morphOps(threshold);
                         //Debug
-                        //debugImshow.showImage(threshold);
+                        debugImshow.showImage(threshold);
                         trackFilteredObject(botsManager.getBotsList().get(i).getBotModel(),threshold,HSV,cameraFeed);
                     }
                     if(isWritingCoordinatesToFile)
@@ -494,21 +499,22 @@ public class VideoCoordinator extends Thread {
 
         //когда настройка завершена
         //наберем статистику из кадров и фильтруем с заданными настройками
-        for (int i = 0; i < numStatisticFrames; i++){
-            cameraRead(this.capture);
-            //нормирование выборки матриц(КОООКК!!!)
-            Mat normed = cameraFeed.clone();
-
-            Core.multiply(normed,Mat.ones(cameraFeed.size(),CvType.CV_8UC3 ),normed,1.0/numStatisticFrames);
-            Core.add(normed,statisticImg,statisticImg);
-        }
-
+//        Mat normed = null;
+//        for (int i = 0; i < numStatisticFrames; i++){
+//            cameraRead(this.capture);
+//            //нормирование выборки матриц
+//            normed = cameraFeed.clone();
+//
+//            Core.multiply(normed,Mat.ones(cameraFeed.size(),CvType.CV_8UC3 ),normed,1.0/numStatisticFrames);
+//            Core.add(normed,statisticImg,statisticImg);
+//        }
+        Mat normed = cameraFeed;
 
         //бинаризуем по заданным параметрам
         try{
-            Imgproc.cvtColor(cameraFeed,HSV,Imgproc.COLOR_BGR2HSV);
+            Imgproc.cvtColor(normed,HSV,Imgproc.COLOR_BGR2HSV);///cameraFeed
             Core.inRange(HSV,walsModel.getHSVmin(),walsModel.getHSVmax(),threshold);
-            morphOps(threshold);
+            walsMorphOps(threshold);
 
         }catch (NullPointerException ex){
              System.out.println(ex.getMessage());

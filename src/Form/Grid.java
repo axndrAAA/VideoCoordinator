@@ -1,5 +1,6 @@
 package Form;
 
+import Bot.BotDriver;
 import Bot.BotModel;
 import Coordinator.BotOnImage;
 import Labitint.Square;
@@ -24,7 +25,7 @@ public class Grid {
     private int thickness = 1;
     private boolean isDrawingTrackPoints = false;
     private ArrayList<Point> track;
-    private int trackPointsSize = 15;
+    private int trackPointsSize = (int)BotDriver.eps;
     private Scalar trackPointsColor = new Scalar(0,204,102);
 
     public Grid(Point upLeftCorner, Point downRightCorner, int rowsNumber, int colsNumber) {
@@ -108,6 +109,7 @@ public class Grid {
             for(int i = 0; i < track.size();i++){
                 Imgproc.circle(ret,new Point(track.get(i).x,track.get(i).y),
                         trackPointsSize,trackPointsColor,-1);
+
             }
         }
 

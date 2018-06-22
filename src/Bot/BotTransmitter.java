@@ -10,7 +10,7 @@ import java.net.Socket;
  */
 public class BotTransmitter extends Thread{//класс - передатчик. Принимает и передает сообщения с платформы и на неё
     private BotModel botModel;//модель платформы
-    public int requestFrequency;//задржка необходимая для принятия всей строки с платформы
+    public int requestFrequency = 100;;//задржка необходимая для принятия всей строки с платформы
 
     private ServerSocket serverSocket;
     private Socket socket;
@@ -23,8 +23,6 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
 
     public BotTransmitter(BotModel botModel)throws IOException{//конструктор
         this.botModel = botModel;
-        this.requestFrequency = 10;
-
         this.isConnectionOk = false;
         serverSocket = new ServerSocket(botModel.getPort());
         botModel.setIP(serverSocket.getInetAddress().getHostName().toString());
@@ -116,7 +114,7 @@ public class BotTransmitter extends Thread{//класс - передатчик. 
                         continue;
                     }
                     botModel.parseStatus(sarr);
-                    System.out.println(s);
+                    //System.out.println(s);
 
                     Thread.currentThread().sleep(requestFrequency);
                 }catch (IOException ex){

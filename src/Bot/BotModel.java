@@ -59,7 +59,7 @@ public class BotModel {//класс-модель платформы
         botOnImage = boi;
     }
 
-    public String getName() {return name + port;}
+    public String getName() {return name +" "+ port;}
     public void setName(String name) {this.name = name;}
 
     public String getIP() {

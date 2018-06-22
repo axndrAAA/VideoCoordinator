@@ -9,7 +9,7 @@ import java.util.Properties;
 /**
  * Created by Александр on 27.10.2016.
  */
-public class TestCarClient  implements Runnable{
+public class TestBotClient implements Runnable{
 
     public boolean flag;
     public int carPort;
@@ -33,7 +33,7 @@ public class TestCarClient  implements Runnable{
         return ret;
     }
 
-    public TestCarClient(){
+    public TestBotClient(){
         flag = true;
         mode = 0;
         carPort = 777;
@@ -131,8 +131,8 @@ public class TestCarClient  implements Runnable{
         }catch (IOException e){System.exit(0);}
 
 
-        TestCarClient tcc = new TestCarClient();
-        System.out.println("TestCarClient started.");
+        TestBotClient tcc = new TestBotClient();
+        System.out.println("TestBotClient started.");
 
         while (true){
             tcc.refresh();

@@ -160,8 +160,8 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         downSpeed = new JButton(String.valueOf('↓'));
         speed = new JTextField(3);
         speed.setText("0");
-        calibrColors = new JButton("Кaл.цв.");
-        calibrCoordinates = new JButton("Кaл.кор");
+        calibrColors = new JButton("Цвета");
+        calibrCoordinates = new JButton("Сетка");
 
         modePanel = new JPanel();
         Border bordur = BorderFactory.createTitledBorder("Режим");
@@ -192,7 +192,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToPanel.add(new JLabel());
         goToPanel.add(goToBtn);
 
-        restartConnection = new JButton("RestartCon");
+        restartConnection = new JButton("Сброс");
 
 
         Image im = null;
@@ -238,53 +238,43 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
         goToBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                grid.showTrackPoints(false,null);
 
+
+                if(!botsManager.getBotTransmitter(0).isConnectionOk()){
+                    JOptionPane.showMessageDialog(null,"Соединение с ботом не установлено. работа не возможна.");
+                    return;
+                }
                 //изображение для дальнейшего анализа и построения карты
                 Mat walsImg = null;
-                //walsImg = Imgcodecs.imread("icon1.png",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-
                 //окно демонстрации биаризованного кадра
                 Imshow imshow = new Imshow("showWals");
 
-                //imshow.showImage(walsImg);
-                //особо хитрожопая магия, чтобы запустить процесс настройки фильтрации кадра и получения
+                //новая карта
+                int[][] newMap = null;
+
+                //особая магия, чтобы запустить процесс настройки фильтрации кадра и получения
                 //бинаризованного кадра со стенами в отдльном потоке
                 if( (walsImg = coordinator.getWalsThresholdedImage()) != null){
                     imshow.showImage(walsImg);
-                }else {
-                    coordinator.tryCalcWalsImage();
-                    imshow.Window.dispose();
-                    imshow = null;
-                    return;
-                }
-                int[][] newMap = null;
-                int dialogResult = JOptionPane.showConfirmDialog (null,
-                        "Утвердите изображение.","Achtung",JOptionPane.YES_NO_OPTION);
-
-                if(dialogResult == JOptionPane.YES_OPTION){
-
                     //если изображение утверждено, рспознаем и устанавливаем как рабочую новую карту
                     newMap = CrazyFactory.getMapFromImage(walsImg);
 
                     imshow.Window.hide();
                     imshow.Window.dispose();
                     imshow = null;
-
                 }else {
-                    //если изображение не утверждено, то пропускаем ход, и пробуем еще раз
-                    imshow.Window.hide();
+                    coordinator.tryCalcWalsImage();
                     imshow.Window.dispose();
                     imshow = null;
                     return;
                 }
 
-
                 //определям в какой клетке в данный момент находится бот номер 0
-                //Square beginSquare = new Square(7, 1);
                 Square beginSquare = CrazyFactory.getWaweAlgCoordinatesFromGridCoord(
                         grid.getSquareBotPlaced(botsManager.getBot(0)));
-//                JOptionPane.showMessageDialog(null,
-//                        "bot in [" + beginSquare);
+
+//                Square beginSquare = new Square(7, 1);
 
                 //точка назначения всегда одна
                 Square endSquare = new Square(7, 3);
@@ -309,10 +299,11 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 ArrayList<Square> squareList = null;
                 ArrayList<Point> track = new ArrayList<>(1);
                 try {
+
                     squareList = crazyFactory.runWaveAlgorithm(false); //Получаем последовательный список с координатами клеток кратчайшего пути
                     if(squareList != null){
                         if(squareList.size() > 0){
-                            JOptionPane.showMessageDialog(null,"Бот в точке: [" + beginSquare +"]. Маршрут построен.");
+                            JOptionPane.showMessageDialog(null,"Бот в точке: " + beginSquare +". Маршрут построен.");
                             //преобразуем номера клеток в координаты на реальном кадре и отображаем трэк
                             track = crazyFactory.map2ImgCoordinates(grid, squareList);
                             grid.showTrackPoints(true,track);
@@ -321,9 +312,13 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                             botsManager.runPanzerCamfWagen(0,track);
                         }
                     }
-                }catch (Exception ex){
+                }catch (IllegalArgumentException ex){
                     JOptionPane.showMessageDialog(null,
-                            "Some shit hapend. Algoritm doesn't work! - " + ex.getMessage());
+                            "Невозможно построить маршрут через лабиринт. " + ex.getMessage());
+                }
+                catch (Exception ex){
+                    JOptionPane.showMessageDialog(null,
+                            "Something went wrong. Algoritm is invalid! - " + ex.getMessage());
                 }
                 }
         });
@@ -369,9 +364,14 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                     }
                     luc_rdc_clicks = !luc_rdc_clicks;
                 }
+
                 Point destPoint = new Point(x,y);
 
                 if(mode1RB.isSelected()){
+                    if(!botsManager.getBotTransmitter(0).isConnectionOk()){
+                        JOptionPane.showMessageDialog(null,"Соединение с ботом не установлено. работа не возможна.");
+                        return;
+                    }
                     botsManager.stopAllDrivers();
                     grid.showTrackPoints(false,null);
                     //JOptionPane.showMessageDialog(null,"X:" + x + "   Y:" + y);

@@ -15,7 +15,7 @@ public class CrazyFactory {
     public Square endingSqr; // Квадрат с координатами выхода из Лабиринта
     int[][] mapArr = {
             {1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 1, 0, 0, 0, 0, 1},
             {1, 0, 1, 1, 1, 1, 1, 0, 1},
             {1, 0, 1, 1, 0, 0, 1, 0, 1},
             {1, 0, 1, 0, 1, 0, 1, 0, 1},
@@ -35,7 +35,106 @@ public class CrazyFactory {
         this.mapArr = mapArr;
     }
 
-    public ArrayList<Square> runWaveAlgorithm(boolean isDiagonalAlowed) {
+//    public ArrayList<Square> runWaveAlgorithm(boolean isDiagonalAlowed) {
+//        diagonalIsAllowed = isDiagonalAlowed;
+//        Square[] squareList;
+//        //Расречатываем Дабиринт
+////        for (int i = 0; i < mapArr.length; i++) {
+////            for (int j = 0; j < mapArr[i].length; j++) {
+////                System.out.print(mapArr[i][j] + "  ");
+////            }
+////            System.out.println();
+////        }
+////        System.out.println();
+//        // Волновой алгоритм
+//        int d = 2;
+//        mapArr[beginingSqr.getX()][beginingSqr.getY()] = d; //начальной клетке присваивается значение d
+//        while (mapArr[endingSqr.getX()][endingSqr.getY()] == 0) { //Пока алгоритм не дошел до точки выхода из лабиринта
+//            for (int i = 0; i < mapArr.length; i++) { // Перебираем строки
+//                for (int j = 0; j < mapArr[i].length; j++) {// Перебираем столбцы
+//                    if (mapArr[i][j] == d) { //ищем клетки, значение которых равно d
+//                        // Проходим по клеткам вокруг d и, если они пустые, присваиваем им значение d+1
+//                        for (int g = -1; g < 2; g++)//Столбец
+//                            for (int v = -1; v < 2; v++) //Строка
+//                            {
+//                                if (diagonalIsAllowed || (g != v && g != -v)) // Проверка на возможность поиска пути по диагонали
+//                                    if (!((i + v < 0) || (i + v >= mapArr.length) || (j + g < 0) || (j + g >= mapArr[i].length))) //Проверка на выход клетки за пределы карты.
+//                                        if (mapArr[i + v][j + g] == 0) { //Проверка, пуста ли клетка, которую хочет пометить Лабиринт
+//                                            mapArr[i + v][j + g] = mapArr[i][j] + 1;
+//                                        }
+//                            }
+//                    }
+//                }
+//            }
+//            d++;
+//        }
+//
+////      Распечатываем карту Лабиринта с путями.
+////        for (int i = 0; i < mapArr.length; i++) {
+////            for (int j = 0; j < mapArr[i].length; j++) {
+////                if (mapArr[i][j] > 9) {
+////                    System.out.print(mapArr[i][j] + " ");
+////                } else {
+////                    System.out.print(mapArr[i][j] + "  ");
+////                }
+////
+////            }
+////            System.out.println();
+////        }
+////        System.out.println();
+//// Формируем список wayPointsList - последовательный лист клеток кратчайшего пути
+//        d = mapArr[endingSqr.getX()][endingSqr.getY()];
+//        squareList = new Square[d - 1];
+//        Square curSquare = endingSqr.clone();
+//        squareList[squareList.length - 1] = endingSqr;
+//        for (int i = 0; i < squareList.length - 1; i++) {
+//            //Ищем квадрат со значением d-1
+//            outerloop:
+//            for (int g = -1; g < 2; g++)//Столбец
+//                for (int v = -1; v < 2; v++) //Строка
+//                {
+//                    if (diagonalIsAllowed || (g != v && g != -v)) // Проверка на возможность поиска пути по диагонали
+//                        if (!((curSquare.getX() + v < 0) || (curSquare.getX() + v >= mapArr.length) || (curSquare.getY() + g < 0) ||
+//                                (curSquare.getY() + g >= mapArr[0].length))) //Проверка на выход клетки за пределы карты.
+//                            if (mapArr[curSquare.getX() + v][curSquare.getY() + g] == d - 1) { //Проверка, имеет ли клетка значение на 1 меньше, чем текущая
+//                                curSquare = new Square(curSquare.getX() + v, g + curSquare.getY());
+//                                squareList[squareList.length - 2 - i] = curSquare;
+//                                d--;
+//                                break outerloop;
+//                            }
+//                }
+//        }
+//
+////Распечатываем список с клетками
+////        for (Square someSquare : squareList) {
+////            System.out.println("x : " + someSquare.getX());
+////            System.out.println("y : " + someSquare.getY());
+////            System.out.println();
+////
+////        }
+//
+//        String fileName = "WaweAlgorithmResult.txt";
+//        try {
+//            FileWriter writer = new FileWriter(fileName,false);
+//            String curStr = " ";
+//            for (int i = 0; i < squareList.length;i++){
+//            curStr = i + " - x : " + squareList[i].getX() + "     y : " + squareList[i].getY() + "\n";
+//                writer.write(curStr);
+//            }
+//            writer.flush();
+//            writer.close();
+//        }catch (IOException ex){
+//            System.out.println(ex.getMessage());
+//        }
+//
+//        //приведение в адекватную форму с контеййнером
+//        ArrayList<Square> output = new ArrayList<Square>(squareList.length);
+//        for (int i = 0; i < squareList.length;i++)
+//            output.add(squareList[i]);
+//        return output;
+//    }
+
+    public ArrayList<Square> runWaveAlgorithm(boolean isDiagonalAlowed) throws IllegalArgumentException{
         diagonalIsAllowed = isDiagonalAlowed;
         Square[] squareList;
         //Расречатываем Дабиринт
@@ -67,6 +166,9 @@ public class CrazyFactory {
                 }
             }
             d++;
+            if (d>((mapArr.length-2)*(mapArr[0].length-2))){
+                throw new IllegalArgumentException("ТЫ НЕ ПРОЙДЕШ.");
+            }
         }
 
 //      Распечатываем карту Лабиринта с путями.
@@ -115,25 +217,24 @@ public class CrazyFactory {
 
         String fileName = "WaweAlgorithmResult.txt";
         try {
-            FileWriter writer = new FileWriter(fileName,false);
+            FileWriter writer = new FileWriter(fileName, false);
             String curStr = " ";
-            for (int i = 0; i < squareList.length;i++){
-            curStr = i + " - x : " + squareList[i].getX() + "     y : " + squareList[i].getY() + "\n";
+            for (int i = 0; i < squareList.length; i++) {
+                curStr = i + " - x : " + squareList[i].getX() + "     y : " + squareList[i].getY() + "\n";
                 writer.write(curStr);
             }
             writer.flush();
             writer.close();
-        }catch (IOException ex){
+        } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
 
         //приведение в адекватную форму с контеййнером
         ArrayList<Square> output = new ArrayList<Square>(squareList.length);
-        for (int i = 0; i < squareList.length;i++)
+        for (int i = 0; i < squareList.length; i++)
             output.add(squareList[i]);
         return output;
     }
-
     public ArrayList<Point> map2ImgCoordinates(Grid grid, ArrayList<Square> badMap){
         ArrayList<Point> goodMap = new ArrayList<>(badMap.size());
 
@@ -248,18 +349,27 @@ public class CrazyFactory {
     }
 
     public  static int[][] getMapFromImage(Mat img){
-        //TODO: здесь будет перестрока mapArr в соответствии с переданным img
+
         int limitKoef = 20;
         int sideKoef = 5;
         int[][] retMap = null;
         try {
             retMap = getMapFromImage(img,limitKoef,sideKoef);
+//            //TODO: DEBUG
+//            for (int i = 0; i < retMap.length;i++){
+//                for (int j = 0; j < retMap[0].length;j++){
+//                    System.out.print(retMap[i][j]);
+//                }
+//                System.out.println();
+//            }
+
             return retMap;
         }catch (Exception ex){
             System.out.println("Something went wrong" + ex.getMessage());
             return retMap;
         }
     }
+
 
     /**
      * @param img       - Изображение, по которому строится картинка
@@ -270,7 +380,7 @@ public class CrazyFactory {
      *                  по вертикали (горизонтали) от найденной на линии, соединяющей центры квадратов,
      *                  белой точки. По умолчанию (значение передается нулевым или отрицательным)= 5. Чем коэффициент
      *                  меньше, тем больше точек обследуется по сторонам от основной линии.
-     * @return - Возвращает карту, которая не пропорциональна лабиринту (требуется приведение)
+     * @return - Возвращает карту, для работы волнового алгоритма. (она не пропорциональна лабиринту)
      */
     public static int[][] getMapFromImage(Mat img, int limitKoef, int sideKoef) {
         byte[] data = new byte[img.height() * img.width() * img.channels()];
