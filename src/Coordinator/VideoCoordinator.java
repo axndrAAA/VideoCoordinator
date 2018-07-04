@@ -396,7 +396,7 @@ public class VideoCoordinator extends Thread {
         }
         Mat threshold = new Mat();
         Mat HSV = new Mat();
-        Imshow debugImshow = new Imshow("debug");
+        //Imshow debugImshow = new Imshow("debug");
 
 
         while (!this.isInterrupted()){
@@ -428,7 +428,7 @@ public class VideoCoordinator extends Thread {
                                 threshold);
                         morphOps(threshold);
                         //Debug
-                        debugImshow.showImage(threshold);
+                        //debugImshow.showImage(threshold);
                         trackFilteredObject(botsManager.getBotsList().get(i).getBotModel(),threshold,HSV,cameraFeed);
                     }
                     if(isWritingCoordinatesToFile)

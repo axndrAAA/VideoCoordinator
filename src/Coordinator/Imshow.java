@@ -10,6 +10,9 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
@@ -19,13 +22,16 @@ import javax.swing.JLabel;
 
 public class Imshow {
     public JFrame Window;
-    private ImageIcon image;
-    private JLabel label;
-    private MatOfByte matOfByte;
-    private Boolean SizeCustom;
-    private int Height;
-    private int Width;
+    protected ImageIcon image;
+    protected JLabel label;
+    protected MatOfByte matOfByte;
+    protected Boolean SizeCustom;
+    protected int Height;
+    protected int Width;
 
+    public Imshow(){
+        this("Imshow");
+    }
     public Imshow(String title) {
         this.Window = new JFrame();
         this.image = new ImageIcon();
@@ -38,7 +44,6 @@ public class Imshow {
         this.SizeCustom = false;
         this.setCloseOption(JFrame.HIDE_ON_CLOSE);
         this.Window.setVisible(true);
-
     }
 
     public Imshow(String title, int height, int width) {
@@ -52,8 +57,6 @@ public class Imshow {
         if (this.SizeCustom.booleanValue()) {
             Imgproc.resize(img, img, new Size((double)this.Height, (double)this.Width));
         }
-
-        //Highgui.imencode(".jpg", img, this.matOfByte);
         BufferedImage bufImage = null;
 
         try {
@@ -67,6 +70,8 @@ public class Imshow {
         }
 
     }
+
+
 
     public static BufferedImage toBufferedImage(Mat m) {
         int type = 10;
@@ -96,5 +101,6 @@ public class Imshow {
         }
 
     }
+
 }
 

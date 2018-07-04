@@ -1,12 +1,15 @@
 package Form;
 
 
+import Coordinator.BFGImshow;
 import Coordinator.Imshow;
 import Coordinator.MedianFilter;
 import Labitint.WalsCalibrationWindow;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 
 import javax.swing.*;
@@ -19,6 +22,8 @@ import java.awt.image.DataBufferByte;
 import java.rmi.AccessException;
 import java.util.ArrayList;
 import java.util.Random;
+
+import static Form.CarDDAppForm.grid;
 
 
 public class MainClass {
@@ -64,8 +69,16 @@ public class MainClass {
 
         CarDDAppForm form = new CarDDAppForm("Window");
 
+        //отдельное окно
+        BFGImshow externalMonitor = new BFGImshow("Monitor");
+
         while (form.botsManager != null){
             form.update();
+
+            //вывод на внешний экран
+            Mat cameraFeed = form.coordinator.getCameraFeed().clone();
+            grid.getGridedCameraFeed(cameraFeed);
+            externalMonitor.showImage(cameraFeed);
         }
 
     }

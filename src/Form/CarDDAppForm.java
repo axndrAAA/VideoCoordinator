@@ -277,6 +277,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
 //                Square beginSquare = new Square(7, 1);
 
                 //точка назначения всегда одна
+                //TODO: конечная точка
                 Square endSquare = new Square(7, 3);
 
                 //алгоритм определения маршрута
@@ -322,6 +323,7 @@ public class CarDDAppForm extends JFrame {//класс формы приложе
                 }
                 }
         });
+
         upSpeed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
